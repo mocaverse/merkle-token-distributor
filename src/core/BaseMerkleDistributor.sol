@@ -50,6 +50,7 @@ abstract contract BaseMerkleDistributor is
     function initialize() public initializer {
         __Ownable_init(_msgSender());
         __Pausable_init_unchained();
+        __ReentrancyGuard_init_unchained();
     }
 
     function setPause(bool shouldPause) external onlyOwner {
