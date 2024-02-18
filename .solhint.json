@@ -10,6 +10,7 @@
     "named-parameters-mapping": "warn",
     "no-inline-assembly": "off",
     "not-rely-on-time": "off",
-    "one-contract-per-file": "off"
+    "one-contract-per-file": "off",
+    "ordering": "error"
   }
 }
