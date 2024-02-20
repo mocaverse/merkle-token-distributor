@@ -34,6 +34,7 @@ abstract contract BaseMerkleDistributor is
     event ClaimDelegateSet(address delegate);
     event TimeSet();
 
+    error UnsupportedOperation();
     error RootExpired();
     error InvalidProof();
     error LeafUsed();
@@ -94,8 +95,7 @@ abstract contract BaseMerkleDistributor is
     }
 
     function setHook(address) external virtual onlyOwner {
-        // solhint-disable-next-line
-        revert();
+        revert UnsupportedOperation();
     }
 
     function claim(
