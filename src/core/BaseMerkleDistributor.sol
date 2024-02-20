@@ -109,6 +109,7 @@ abstract contract BaseMerkleDistributor is
         nonReentrant
     {
         _verifyAndClaim(_msgSender(), proof, group, data);
+        _afterClaim();
     }
 
     function delegateClaim(
@@ -124,6 +125,7 @@ abstract contract BaseMerkleDistributor is
         nonReentrant
     {
         _verifyAndClaim(recipient, proof, group, data);
+        _afterDelegateClaim();
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
@@ -153,6 +155,9 @@ abstract contract BaseMerkleDistributor is
 
     // solhint-disable-next-line no-empty-blocks
     function _afterClaim() internal virtual { }
+
+    // solhint-disable-next-line no-empty-blocks
+    function _afterDelegateClaim() internal virtual { }
 
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner { }
