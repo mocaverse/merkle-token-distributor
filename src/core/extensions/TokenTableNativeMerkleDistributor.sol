@@ -10,7 +10,7 @@ contract TokenTableNativeMerkleDistributor is TokenTableMerkleDistributor {
         revert UnsupportedOperation();
     }
 
-    function _send(address recipient, uint256 amount) internal virtual override {
+    function _send(address recipient, address, uint256 amount) internal virtual override {
         (bool success, bytes memory data) = recipient.call{ value: amount }("");
         // solhint-disable-next-line custom-errors
         require(success, string(data));

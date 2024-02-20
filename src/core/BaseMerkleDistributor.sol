@@ -17,7 +17,10 @@ abstract contract BaseMerkleDistributor is
 
     /// @custom:storage-location erc7201:ethsign.misc.BaseMerkleDistributor
     struct BaseMerkleDistributorStorage {
+        mapping(bytes32 leaf => bool used) usedLeafs;
         bytes32 root;
+        address token;
+        address claimDelegate;
         uint256 startTime;
         uint256 endTime;
     }
@@ -27,6 +30,8 @@ abstract contract BaseMerkleDistributor is
         0x452bdf2c9fe836ad357e55ed0859c19d2ac2a2c151d216523e3d37a8b9a03f00;
 
     event RootSet();
+    event TokenSet(address token);
+    event ClaimDelegateSet(address delegate);
     event TimeSet();
 
     error RootExpired();
@@ -39,8 +44,15 @@ abstract contract BaseMerkleDistributor is
         }
     }
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line ordering
+    modifier onlyDelegate() {
+        if (_msgSender() != _getBaseMerkleDistributorStorage().claimDelegate) {
+            revert OwnableUnauthorizedAccount(_msgSender());
+        }
+        _;
+    }
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         if (block.chainid != 31_337) {
             _disableInitializers();
@@ -64,11 +76,54 @@ abstract contract BaseMerkleDistributor is
         emit RootSet();
     }
 
+    function setToken(address token) external virtual onlyOwner {
+        _getBaseMerkleDistributorStorage().token = token;
+        emit TokenSet(token);
+    }
+
+    function setClaimDelegate(address delegate) external onlyOwner {
+        _getBaseMerkleDistributorStorage().claimDelegate = delegate;
+        emit ClaimDelegateSet(delegate);
+    }
+
     function setStartEndTime(uint256 startTime, uint256 endTime) external onlyOwner {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         $.startTime = startTime;
         $.endTime = endTime;
         emit TimeSet();
+    }
+
+    function setHook(address) external virtual onlyOwner {
+        // solhint-disable-next-line
+        revert();
+    }
+
+    function claim(
+        bytes32[] calldata proof,
+        bytes32 group,
+        bytes calldata data
+    )
+        external
+        virtual
+        whenNotPaused
+        nonReentrant
+    {
+        _verifyAndClaim(_msgSender(), proof, group, data);
+    }
+
+    function delegateClaim(
+        address recipient,
+        bytes32[] calldata proof,
+        bytes32 group,
+        bytes calldata data
+    )
+        external
+        virtual
+        whenNotPaused
+        onlyDelegate
+        nonReentrant
+    {
+        _verifyAndClaim(recipient, proof, group, data);
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
@@ -81,7 +136,23 @@ abstract contract BaseMerkleDistributor is
         if (!proof.verifyCalldata($.root, leaf)) revert InvalidProof();
     }
 
-    function _isLeafUsed(bytes32 leaf) internal view virtual returns (bool);
+    function _verifyAndClaim(
+        address recipient,
+        bytes32[] calldata proof,
+        bytes32 group,
+        bytes calldata data
+    )
+        internal
+        virtual;
+
+    function _send(address recipient, address token, uint256 amount) internal virtual;
+
+    function _isLeafUsed(bytes32 leaf) internal view virtual returns (bool) {
+        return _getBaseMerkleDistributorStorage().usedLeafs[leaf];
+    }
+
+    // solhint-disable-next-line no-empty-blocks
+    function _afterClaim() internal virtual { }
 
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner { }
