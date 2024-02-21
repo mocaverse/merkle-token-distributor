@@ -30,6 +30,7 @@ abstract contract BaseMerkleDistributor is
     bytes32 private constant BaseMerkleDistributorStorageLocation =
         0x452bdf2c9fe836ad357e55ed0859c19d2ac2a2c151d216523e3d37a8b9a03f00;
 
+    event Initialized(string projectId);
     event RootSet();
     event RootLocked();
     event TokenSet(address token);
@@ -62,10 +63,11 @@ abstract contract BaseMerkleDistributor is
         }
     }
 
-    function initialize() public initializer {
+    function initialize(string memory projectId) public initializer {
         __Ownable_init(_msgSender());
         __Pausable_init_unchained();
         __ReentrancyGuard_init_unchained();
+        emit Initialized(projectId);
     }
 
     function setPause(bool shouldPause) external onlyOwner {
