@@ -23,6 +23,7 @@ abstract contract BaseMerkleDistributor is
         address claimDelegate;
         uint256 startTime;
         uint256 endTime;
+        bool rootLocked;
     }
 
     // keccak256(abi.encode(uint256(keccak256("ethsign.misc.BaseMerkleDistributor")) - 1)) & ~bytes32(uint256(0xff))
@@ -30,6 +31,7 @@ abstract contract BaseMerkleDistributor is
         0x452bdf2c9fe836ad357e55ed0859c19d2ac2a2c151d216523e3d37a8b9a03f00;
 
     event RootSet();
+    event RootLocked();
     event TokenSet(address token);
     event ClaimDelegateSet(address delegate);
     event TimeSet();
@@ -73,8 +75,15 @@ abstract contract BaseMerkleDistributor is
     function setRoot(bytes32 root, uint256 deadline) external onlyOwner {
         if (deadline < block.timestamp) revert RootExpired();
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        if ($.rootLocked) revert UnsupportedOperation();
         $.root = root;
         emit RootSet();
+    }
+
+    function lockRoot() external onlyOwner {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        $.rootLocked = true;
+        emit RootLocked();
     }
 
     function setToken(address token) external virtual onlyOwner {
