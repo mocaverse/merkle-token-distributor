@@ -1,6 +1,7 @@
 # directories
 broadcast
 cache
+cache_hardhat
 coverage
 node_modules
 out
