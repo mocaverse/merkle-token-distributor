@@ -18,7 +18,8 @@
     "test:coverage": "forge coverage",
     "test:gas": "forge test --gas-report",
     "deploy": "npx hardhat run deploy/99-deploy-mockerc721.ts --network",
-    "deploy:nft": "npx hardhat deploy --tags MockERC721 --network "
+    "deploy:nft": "npx hardhat deploy --tags MockERC721 --network ",
+    "verify": "npx hardhat verify --network"
   },
   "author": "",
   "license": "ISC",
