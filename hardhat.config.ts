@@ -79,10 +79,19 @@ const config: HardhatUserConfig = {
             accounts: [process.env.PRIVATE_KEY!],
             saveDeployments: true,
             zksync: false
+        },
+        beraTestnet: {
+            url: 'https://rpc.ankr.com/berachain_testnet',
+            chainId: 80085,
+            loggingEnabled: true,
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
         }
     },
     etherscan: {
         apiKey: {
+            beraTestnet: 'artio_testnet',
             polygon: process.env.POLYGONSCAN_KEY!,
             polygonMumbai: process.env.POLYGONSCAN_KEY!,
             mantaPacific: process.env.MANTAPACIFIC_KEY!,
@@ -108,6 +117,14 @@ const config: HardhatUserConfig = {
                 urls: {
                     apiURL: 'https://zetachain.blockscout.com/api',
                     browserURL: 'https://zetachain.blockscout.com/'
+                }
+            },
+            {
+                network: 'beraTestnet',
+                chainId: 80085,
+                urls: {
+                    apiURL: 'https://api.routescan.io/v2/network/testnet/evm/80085/etherscan',
+                    browserURL: 'https://artio.beratrail.io'
                 }
             }
         ]
