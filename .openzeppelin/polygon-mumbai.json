@@ -1,0 +1,505 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xEeD617d2b4d6716C6E7e2A0225188bB2Ff5647e6",
+      "txHash": "0xce3743d2f518315c8501774c62d34b463044dc33be8938f15f523fc4744f52a7",
+      "kind": "uups"
+    },
+    {
+      "address": "0x14292870150173D13E16855363D52E66D6042BB4",
+      "txHash": "0x126665eacbd9371d38d37fabe0d977e41c0c60439f320a4bf96550896c119e10",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "cd0f39a416a672496a9018096e01631f59d25ad9fc531e3b9c7c5f1b62176f95": {
+      "address": "0x9eF32A2585F65c5A3df01cd310612ada300e6a43",
+      "txHash": "0x29aecbd9ab348ba27d3a5cae10777063939f6f9f91a0256117e2163f30a56f09",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BaseMerkleDistributorStorage)1109_storage": {
+            "label": "struct BaseMerkleDistributor.BaseMerkleDistributorStorage",
+            "members": [
+              {
+                "label": "usedLeafs",
+                "type": "t_mapping(t_bytes32,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "root",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "claimDelegate",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "startTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "rootLocked",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)190_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)251_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:ethsign.misc.BaseMerkleDistributor": [
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "usedLeafs",
+              "type": "t_mapping(t_bytes32,t_bool)",
+              "src": "src/core/BaseMerkleDistributor.sol:20",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "root",
+              "type": "t_bytes32",
+              "src": "src/core/BaseMerkleDistributor.sol:21",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "token",
+              "type": "t_address",
+              "src": "src/core/BaseMerkleDistributor.sol:22",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "claimDelegate",
+              "type": "t_address",
+              "src": "src/core/BaseMerkleDistributor.sol:23",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "startTime",
+              "type": "t_uint256",
+              "src": "src/core/BaseMerkleDistributor.sol:24",
+              "offset": 0,
+              "slot": "4"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "endTime",
+              "type": "t_uint256",
+              "src": "src/core/BaseMerkleDistributor.sol:25",
+              "offset": 0,
+              "slot": "5"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "rootLocked",
+              "type": "t_bool",
+              "src": "src/core/BaseMerkleDistributor.sol:26",
+              "offset": 0,
+              "slot": "6"
+            }
+          ],
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "3fc4d99ebbed4c9c82472b1bbd5d00df78f3a72ce76c293525c547dc49b558c8": {
+      "address": "0x5Bf9e51727ea868EdBdCa6DFb511149c3F46808f",
+      "txHash": "0x123f24fd2939fda7712433a4698bbe4539579a61a8886bf33e3e9463f9dc6bb1",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BaseMerkleDistributorStorage)626_storage": {
+            "label": "struct BaseMerkleDistributor.BaseMerkleDistributorStorage",
+            "members": [
+              {
+                "label": "usedLeafs",
+                "type": "t_mapping(t_bytes32,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "root",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "claimDelegate",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "startTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "rootLocked",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)190_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)251_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:ethsign.misc.BaseMerkleDistributor": [
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "usedLeafs",
+              "type": "t_mapping(t_bytes32,t_bool)",
+              "src": "src/core/BaseMerkleDistributor.sol:20",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "root",
+              "type": "t_bytes32",
+              "src": "src/core/BaseMerkleDistributor.sol:21",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "token",
+              "type": "t_address",
+              "src": "src/core/BaseMerkleDistributor.sol:22",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "claimDelegate",
+              "type": "t_address",
+              "src": "src/core/BaseMerkleDistributor.sol:23",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "startTime",
+              "type": "t_uint256",
+              "src": "src/core/BaseMerkleDistributor.sol:24",
+              "offset": 0,
+              "slot": "4"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "endTime",
+              "type": "t_uint256",
+              "src": "src/core/BaseMerkleDistributor.sol:25",
+              "offset": 0,
+              "slot": "5"
+            },
+            {
+              "contract": "BaseMerkleDistributor",
+              "label": "rootLocked",
+              "type": "t_bool",
+              "src": "src/core/BaseMerkleDistributor.sol:26",
+              "offset": 0,
+              "slot": "6"
+            }
+          ],
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
