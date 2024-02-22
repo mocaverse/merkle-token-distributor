@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL v3
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
@@ -151,8 +151,12 @@ abstract contract BaseMerkleDistributor is
 
     function verify(bytes32[] calldata proof, bytes32 leaf) public view virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        if (_isLeafUsed(leaf)) revert LeafUsed();
+        if (isLeafUsed(leaf)) revert LeafUsed();
         if (!proof.verifyCalldata($.root, leaf)) revert InvalidProof();
+    }
+
+    function isLeafUsed(bytes32 leaf) public view virtual returns (bool) {
+        return _getBaseMerkleDistributorStorage().usedLeafs[leaf];
     }
 
     function _verifyAndClaim(
@@ -165,10 +169,6 @@ abstract contract BaseMerkleDistributor is
         virtual;
 
     function _send(address recipient, address token, uint256 amount) internal virtual;
-
-    function _isLeafUsed(bytes32 leaf) internal view virtual returns (bool) {
-        return _getBaseMerkleDistributorStorage().usedLeafs[leaf];
-    }
 
     // solhint-disable-next-line no-empty-blocks
     function _afterClaim() internal virtual { }

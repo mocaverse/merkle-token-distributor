@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL v3
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";
 import { BaseMerkleDistributor } from "./BaseMerkleDistributor.sol";
 import { TokenTableMerkleDistributor } from "./extensions/TokenTableMerkleDistributor.sol";
 import { TokenTableNativeMerkleDistributor } from "./extensions/TokenTableNativeMerkleDistributor.sol";
 import { SimpleERC721MerkleDistributor } from "./extensions/SimpleERC721MerkleDistributor.sol";
+import { IVersionable } from "../interfaces/IVersionable.sol";
 
 enum MDType {
     TokenTable,
@@ -13,7 +14,7 @@ enum MDType {
     SimpleERC721
 }
 
-contract MDCreate2 {
+contract MDCreate2 is IVersionable {
     error UnsupportedOperation();
 
     function deploy(MDType mdType, string calldata projectId) external returns (address instance) {
@@ -25,6 +26,10 @@ contract MDCreate2 {
     function simulateDeploy(MDType mdType, string calldata projectId) external view returns (address instance) {
         bytes memory bytecode = _getBytecodeFromEnum(mdType);
         instance = Create2.computeAddress(keccak256(abi.encode(projectId)), keccak256(abi.encodePacked(bytecode)));
+    }
+
+    function version() external pure override returns (string memory) {
+        return "0.0.1";
     }
 
     function _getBytecodeFromEnum(MDType mdType) internal pure returns (bytes memory bytecode) {

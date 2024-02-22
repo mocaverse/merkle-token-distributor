@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL v3
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import { TokenTableMerkleDistributor } from "./TokenTableMerkleDistributor.sol";
 import { IERC721SafeMintable } from "../../interfaces/IERC721SafeMintable.sol";

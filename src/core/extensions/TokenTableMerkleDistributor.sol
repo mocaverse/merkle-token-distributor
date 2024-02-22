@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL v3
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import { BaseMerkleDistributor } from "../BaseMerkleDistributor.sol";
 import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
