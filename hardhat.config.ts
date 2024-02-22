@@ -1,5 +1,6 @@
 import {HardhatUserConfig} from 'hardhat/config'
 import {config as configENV} from 'dotenv'
+import '@nomicfoundation/hardhat-toolbox'
 import '@nomicfoundation/hardhat-foundry'
 import '@openzeppelin/hardhat-upgrades'
 import 'solidity-docgen'

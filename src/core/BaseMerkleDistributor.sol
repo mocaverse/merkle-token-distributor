@@ -6,12 +6,14 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import { IVersionable } from "../interfaces/IVersionable.sol";
 
 abstract contract BaseMerkleDistributor is
     OwnableUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    IVersionable
 {
     using MerkleProof for bytes32[];
 
@@ -137,6 +139,10 @@ abstract contract BaseMerkleDistributor is
     {
         _verifyAndClaim(recipient, proof, group, data);
         _afterDelegateClaim();
+    }
+
+    function version() external pure returns (string memory) {
+        return "0.0.1";
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {

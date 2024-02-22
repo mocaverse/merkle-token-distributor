@@ -4,7 +4,7 @@ async function main() {
     const Factory = await ethers.getContractFactory(
         'SimpleERC721MerkleDistributor'
     )
-    const instance = await upgrades.deployProxy(Factory, ['test'])
+    const instance = await upgrades.deployProxy(Factory, ['dragon-mint'])
     await instance.waitForDeployment()
 }
 

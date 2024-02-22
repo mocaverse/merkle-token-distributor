@@ -5,6 +5,7 @@ cache_hardhat
 coverage
 node_modules
 out
+typechain-types
 
 # files
 *.env
