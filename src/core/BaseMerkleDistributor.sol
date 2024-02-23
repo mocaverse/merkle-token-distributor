@@ -165,7 +165,7 @@ abstract contract BaseMerkleDistributor is
         _afterDelegateClaim();
     }
 
-    function nuke() external virtual onlyOwner {
+    function nuke() external virtual whenPaused onlyOwner {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         $.root = 0;
         $.token = address(0);
