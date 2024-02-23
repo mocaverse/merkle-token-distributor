@@ -129,6 +129,9 @@ const config: HardhatUserConfig = {
             }
         ]
     },
+    sourcify: {
+        enabled: false
+    },
     docgen: {
         pages: 'files',
         exclude: []

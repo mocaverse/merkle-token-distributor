@@ -2,38 +2,8 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0xFa711f38eB0681013b8394A35d1f685aDf6ED44B",
-      "txHash": "0x11486e7af5d2bf93c24c19bf5bd337fa6d1c25c42650a880b845e89740d20072",
-      "kind": "uups"
-    },
-    {
-      "address": "0x84570963304f0aaF7852b03849FFf2996962cd2d",
-      "txHash": "0x1e085cb2f7efae56c80f948b904cc6a54653c318b25acb6014200b0ab751d9d9",
-      "kind": "uups"
-    },
-    {
-      "address": "0x26f4D58E741Dd2eC68230Ee24B436fA4046E556c",
-      "txHash": "0xae1472b71bb8e429efe53d27dcd7d95c8fd1d1457310ad14c78f75c9c8782f87",
-      "kind": "uups"
-    },
-    {
-      "address": "0xDc8611880fB0543B5C4FBfF29CD51E468198A276",
-      "txHash": "0x272a4bdb49c364e2bef4090c4b17c4f29b055e2a89debc3fa181d1d95b1444c1",
-      "kind": "uups"
-    },
-    {
-      "address": "0x0ED5496B07D0Cf85b0e64EFe0e4A3d4F90D414b2",
-      "txHash": "0x8de6b9bec4316ec7df42ed5fbe1a2ef26783582e6f818c8a4ed3f213aaa651a1",
-      "kind": "uups"
-    },
-    {
-      "address": "0xC318cF0FfB25ACc76dF5461517B141A578D74Cfc",
-      "txHash": "0x7bc557db9a9e84560f595d09cb501b634273655a943e115ffe6302276b0cb0f8",
-      "kind": "uups"
-    },
-    {
-      "address": "0x97F8dF843d436aaB7dB07790483D5606AbCa704e",
-      "txHash": "0x4a58e4b286d01df541af19bf8157db3fb82aa38dd4a414c663d7c70ed3ab029d",
+      "address": "0x2961121f816Ca5FC921Dd2Ff563345765845C3b8",
+      "txHash": "0x6767450684cde339ca7f00455349cab5bcf80b8236aa6061d31f337f6549b1db",
       "kind": "uups"
     },
     {
@@ -53,9 +23,9 @@
     }
   ],
   "impls": {
-    "2487b2375338e084b19c61d8be982fec7906e90f811dae8755765f29c8b61ced": {
-      "address": "0x8b68254F9eDb6a0AC0E54f802bbD8a553B6847c9",
-      "txHash": "0x392ac322c640c81ecbf9173f2764eb652cfe8b80b90843a4bed0a07fdb3e1aad",
+    "c9b6aa4815bff5fbfd491e9d7e29ddaf5fc64db5bea5a54075eed6968808fc1c": {
+      "address": "0x759ac3CA33FeeAfB8C41aEbC8687A7Bd849Fc87a",
+      "txHash": "0x84e4276c137ef6796525ff35b1fdbb55853c240b985aade4e72c3833e34d6ee8",
       "layout": {
         "solcVersion": "0.8.24",
         "storage": [],
@@ -68,61 +38,27 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_bytes32": {
-            "label": "bytes32",
+          "t_string_storage": {
+            "label": "string",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_bool)": {
-            "label": "mapping(bytes32 => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_struct(BaseMerkleDistributorStorage)1135_storage": {
-            "label": "struct BaseMerkleDistributor.BaseMerkleDistributorStorage",
+          "t_struct(DragonYearNFTStorage)743_storage": {
+            "label": "struct DragonYearNFT.DragonYearNFTStorage",
             "members": [
               {
-                "label": "usedLeafs",
-                "type": "t_mapping(t_bytes32,t_bool)",
+                "label": "minter",
+                "type": "t_address",
                 "offset": 0,
                 "slot": "0"
               },
               {
-                "label": "root",
-                "type": "t_bytes32",
+                "label": "baseURI",
+                "type": "t_string_storage",
                 "offset": 0,
                 "slot": "1"
-              },
-              {
-                "label": "token",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "claimDelegate",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "endTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "rootLocked",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "6"
               }
             ],
-            "numberOfBytes": "224"
+            "numberOfBytes": "64"
           },
           "t_struct(InitializableStorage)64_storage": {
             "label": "struct Initializable.InitializableStorage",
@@ -154,116 +90,28 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PausableStorage)190_storage": {
-            "label": "struct PausableUpgradeable.PausableStorage",
-            "members": [
-              {
-                "label": "_paused",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(ReentrancyGuardStorage)251_storage": {
-            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
-            "members": [
-              {
-                "label": "_status",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
           "t_uint64": {
             "label": "uint64",
             "numberOfBytes": "8"
           }
         },
         "namespaces": {
-          "erc7201:ethsign.misc.BaseMerkleDistributor": [
+          "erc7201:ethsign.sign.DragonYearNFT": [
             {
-              "contract": "BaseMerkleDistributor",
-              "label": "usedLeafs",
-              "type": "t_mapping(t_bytes32,t_bool)",
-              "src": "src/core/BaseMerkleDistributor.sol:22",
+              "contract": "DragonYearNFT",
+              "label": "minter",
+              "type": "t_address",
+              "src": "src/tokens/DragonYearNFT.sol:12",
               "offset": 0,
               "slot": "0"
             },
             {
-              "contract": "BaseMerkleDistributor",
-              "label": "root",
-              "type": "t_bytes32",
-              "src": "src/core/BaseMerkleDistributor.sol:23",
+              "contract": "DragonYearNFT",
+              "label": "baseURI",
+              "type": "t_string_storage",
+              "src": "src/tokens/DragonYearNFT.sol:13",
               "offset": 0,
               "slot": "1"
-            },
-            {
-              "contract": "BaseMerkleDistributor",
-              "label": "token",
-              "type": "t_address",
-              "src": "src/core/BaseMerkleDistributor.sol:24",
-              "offset": 0,
-              "slot": "2"
-            },
-            {
-              "contract": "BaseMerkleDistributor",
-              "label": "claimDelegate",
-              "type": "t_address",
-              "src": "src/core/BaseMerkleDistributor.sol:25",
-              "offset": 0,
-              "slot": "3"
-            },
-            {
-              "contract": "BaseMerkleDistributor",
-              "label": "startTime",
-              "type": "t_uint256",
-              "src": "src/core/BaseMerkleDistributor.sol:26",
-              "offset": 0,
-              "slot": "4"
-            },
-            {
-              "contract": "BaseMerkleDistributor",
-              "label": "endTime",
-              "type": "t_uint256",
-              "src": "src/core/BaseMerkleDistributor.sol:27",
-              "offset": 0,
-              "slot": "5"
-            },
-            {
-              "contract": "BaseMerkleDistributor",
-              "label": "rootLocked",
-              "type": "t_bool",
-              "src": "src/core/BaseMerkleDistributor.sol:28",
-              "offset": 0,
-              "slot": "6"
-            }
-          ],
-          "erc7201:openzeppelin.storage.ReentrancyGuard": [
-            {
-              "contract": "ReentrancyGuardUpgradeable",
-              "label": "_status",
-              "type": "t_uint256",
-              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Pausable": [
-            {
-              "contract": "PausableUpgradeable",
-              "label": "_paused",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
-              "offset": 0,
-              "slot": "0"
             }
           ],
           "erc7201:openzeppelin.storage.Ownable": [
