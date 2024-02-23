@@ -24,7 +24,7 @@ describe('MDCreate2', () => {
         const instance = (
             await ethers.getContractFactory('SimpleERC721MerkleDistributor')
         ).attach(instanceAddress) as SimpleERC721MerkleDistributor
-        expect(await instance.version()).to.equal('0.0.1')
+        expect(await instance.version()).to.equal('0.0.2')
     })
 
     it('should simulate the correct address', async () => {
