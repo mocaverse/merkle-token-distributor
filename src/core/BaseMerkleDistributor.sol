@@ -43,6 +43,7 @@ abstract contract BaseMerkleDistributor is
     error RootExpired();
     error RootIsLocked();
     error RootNotLocked();
+    error TimeInactive();
     error InvalidProof();
     error LeafUsed();
 
@@ -67,6 +68,14 @@ abstract contract BaseMerkleDistributor is
 
     modifier onlyLocked() {
         if (!_getBaseMerkleDistributorStorage().rootLocked) revert RootNotLocked();
+        _;
+    }
+
+    modifier onlyActive() {
+        if (
+            block.timestamp < _getBaseMerkleDistributorStorage().startTime
+                || block.timestamp > _getBaseMerkleDistributorStorage().endTime
+        ) revert TimeInactive();
         _;
     }
 
@@ -131,6 +140,7 @@ abstract contract BaseMerkleDistributor is
         virtual
         whenNotPaused
         onlyLocked
+        onlyActive
         nonReentrant
     {
         _verifyAndClaim(_msgSender(), proof, group, data);
@@ -148,6 +158,7 @@ abstract contract BaseMerkleDistributor is
         whenNotPaused
         onlyDelegate
         onlyLocked
+        onlyActive
         nonReentrant
     {
         _verifyAndClaim(recipient, proof, group, data);
