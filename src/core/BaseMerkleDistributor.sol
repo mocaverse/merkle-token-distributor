@@ -41,6 +41,8 @@ abstract contract BaseMerkleDistributor is
 
     error UnsupportedOperation();
     error RootExpired();
+    error RootIsLocked();
+    error RootNotLocked();
     error InvalidProof();
     error LeafUsed();
 
@@ -55,6 +57,16 @@ abstract contract BaseMerkleDistributor is
         if (_msgSender() != _getBaseMerkleDistributorStorage().claimDelegate) {
             revert OwnableUnauthorizedAccount(_msgSender());
         }
+        _;
+    }
+
+    modifier onlyNotLocked() {
+        if (_getBaseMerkleDistributorStorage().rootLocked) revert RootIsLocked();
+        _;
+    }
+
+    modifier onlyLocked() {
+        if (!_getBaseMerkleDistributorStorage().rootLocked) revert RootNotLocked();
         _;
     }
 
@@ -76,10 +88,9 @@ abstract contract BaseMerkleDistributor is
         shouldPause ? _pause() : _unpause();
     }
 
-    function setRoot(bytes32 root, uint256 deadline) external onlyOwner {
+    function setRoot(bytes32 root, uint256 deadline) external onlyOwner onlyNotLocked {
         if (deadline < block.timestamp) revert RootExpired();
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        if ($.rootLocked) revert UnsupportedOperation();
         $.root = root;
         emit RootSet();
     }
@@ -90,7 +101,7 @@ abstract contract BaseMerkleDistributor is
         emit RootLocked();
     }
 
-    function setToken(address token) external virtual onlyOwner {
+    function setToken(address token) external virtual onlyOwner onlyNotLocked {
         _getBaseMerkleDistributorStorage().token = token;
         emit TokenSet(token);
     }
@@ -100,14 +111,14 @@ abstract contract BaseMerkleDistributor is
         emit ClaimDelegateSet(delegate);
     }
 
-    function setStartEndTime(uint256 startTime, uint256 endTime) external onlyOwner {
+    function setStartEndTime(uint256 startTime, uint256 endTime) external onlyOwner onlyNotLocked {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         $.startTime = startTime;
         $.endTime = endTime;
         emit TimeSet();
     }
 
-    function setHook(address) external virtual onlyOwner {
+    function setHook(address) external virtual onlyOwner onlyNotLocked {
         revert UnsupportedOperation();
     }
 
@@ -119,6 +130,7 @@ abstract contract BaseMerkleDistributor is
         external
         virtual
         whenNotPaused
+        onlyLocked
         nonReentrant
     {
         _verifyAndClaim(_msgSender(), proof, group, data);
@@ -135,14 +147,25 @@ abstract contract BaseMerkleDistributor is
         virtual
         whenNotPaused
         onlyDelegate
+        onlyLocked
         nonReentrant
     {
         _verifyAndClaim(recipient, proof, group, data);
         _afterDelegateClaim();
     }
 
+    function nuke() external virtual onlyOwner {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        $.root = 0;
+        $.token = address(0);
+        $.claimDelegate = address(0);
+        $.startTime = 0;
+        $.endTime = 0;
+        renounceOwnership();
+    }
+
     function version() external pure returns (string memory) {
-        return "0.0.1";
+        return "0.0.2";
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
