@@ -17,8 +17,8 @@
     "test": "forge test",
     "test:coverage": "forge coverage",
     "test:gas": "forge test --gas-report",
-    "deploy": "npx hardhat run deploy/99-deploy-mockerc721.ts --network",
-    "deploy:nft": "npx hardhat deploy --tags MockERC721 --network ",
+    "deploy": "npx hardhat run scripts/02-deploy-simpleerc721merkledistributor.ts --network",
+    "deploy:nft": "npx hardhat run scripts/03-deploy-dragonyearnft.ts --network ",
     "verify": "npx hardhat verify --network"
   },
   "author": "",
