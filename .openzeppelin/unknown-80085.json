@@ -2,15 +2,30 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x5880fcb2fe63580CF50Efacc9A2a677CD9b74369",
-      "txHash": "0xf8b43f4392e893da1e2d3798337cf77447b728484b2d87f06454bfd9b8d48dd8",
+      "address": "0xFa711f38eB0681013b8394A35d1f685aDf6ED44B",
+      "txHash": "0x11486e7af5d2bf93c24c19bf5bd337fa6d1c25c42650a880b845e89740d20072",
+      "kind": "uups"
+    },
+    {
+      "address": "0x84570963304f0aaF7852b03849FFf2996962cd2d",
+      "txHash": "0x1e085cb2f7efae56c80f948b904cc6a54653c318b25acb6014200b0ab751d9d9",
+      "kind": "uups"
+    },
+    {
+      "address": "0x26f4D58E741Dd2eC68230Ee24B436fA4046E556c",
+      "txHash": "0xae1472b71bb8e429efe53d27dcd7d95c8fd1d1457310ad14c78f75c9c8782f87",
+      "kind": "uups"
+    },
+    {
+      "address": "0xDc8611880fB0543B5C4FBfF29CD51E468198A276",
+      "txHash": "0x272a4bdb49c364e2bef4090c4b17c4f29b055e2a89debc3fa181d1d95b1444c1",
       "kind": "uups"
     }
   ],
   "impls": {
-    "3fc4d99ebbed4c9c82472b1bbd5d00df78f3a72ce76c293525c547dc49b558c8": {
-      "address": "0xd7da7BEff1F1CEDC45Dc1e4e97a95D00f716d68f",
-      "txHash": "0xc6c28558e99ab61d38ce99d9b937149e0e0a0cb4509e078eb47f0c56461dffbc",
+    "2487b2375338e084b19c61d8be982fec7906e90f811dae8755765f29c8b61ced": {
+      "address": "0x8b68254F9eDb6a0AC0E54f802bbD8a553B6847c9",
+      "txHash": "0x392ac322c640c81ecbf9173f2764eb652cfe8b80b90843a4bed0a07fdb3e1aad",
       "layout": {
         "solcVersion": "0.8.24",
         "storage": [],
@@ -31,7 +46,7 @@
             "label": "mapping(bytes32 => bool)",
             "numberOfBytes": "32"
           },
-          "t_struct(BaseMerkleDistributorStorage)626_storage": {
+          "t_struct(BaseMerkleDistributorStorage)1135_storage": {
             "label": "struct BaseMerkleDistributor.BaseMerkleDistributorStorage",
             "members": [
               {
@@ -148,7 +163,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "usedLeafs",
               "type": "t_mapping(t_bytes32,t_bool)",
-              "src": "src/core/BaseMerkleDistributor.sol:20",
+              "src": "src/core/BaseMerkleDistributor.sol:22",
               "offset": 0,
               "slot": "0"
             },
@@ -156,7 +171,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "root",
               "type": "t_bytes32",
-              "src": "src/core/BaseMerkleDistributor.sol:21",
+              "src": "src/core/BaseMerkleDistributor.sol:23",
               "offset": 0,
               "slot": "1"
             },
@@ -164,7 +179,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "token",
               "type": "t_address",
-              "src": "src/core/BaseMerkleDistributor.sol:22",
+              "src": "src/core/BaseMerkleDistributor.sol:24",
               "offset": 0,
               "slot": "2"
             },
@@ -172,7 +187,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "claimDelegate",
               "type": "t_address",
-              "src": "src/core/BaseMerkleDistributor.sol:23",
+              "src": "src/core/BaseMerkleDistributor.sol:25",
               "offset": 0,
               "slot": "3"
             },
@@ -180,7 +195,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "startTime",
               "type": "t_uint256",
-              "src": "src/core/BaseMerkleDistributor.sol:24",
+              "src": "src/core/BaseMerkleDistributor.sol:26",
               "offset": 0,
               "slot": "4"
             },
@@ -188,7 +203,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "endTime",
               "type": "t_uint256",
-              "src": "src/core/BaseMerkleDistributor.sol:25",
+              "src": "src/core/BaseMerkleDistributor.sol:27",
               "offset": 0,
               "slot": "5"
             },
@@ -196,7 +211,7 @@
               "contract": "BaseMerkleDistributor",
               "label": "rootLocked",
               "type": "t_bool",
-              "src": "src/core/BaseMerkleDistributor.sol:26",
+              "src": "src/core/BaseMerkleDistributor.sol:28",
               "offset": 0,
               "slot": "6"
             }
