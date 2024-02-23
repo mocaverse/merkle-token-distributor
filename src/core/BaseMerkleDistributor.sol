@@ -183,6 +183,31 @@ abstract contract BaseMerkleDistributor is
         return keccak256(abi.encode(address(this), user, group, data));
     }
 
+    function getClaimDelegate() external view returns (address) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return $.claimDelegate;
+    }
+
+    function getRoot() external view returns (bytes32) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return $.root;
+    }
+
+    function getRootLocked() external view returns (bool) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return $.rootLocked;
+    }
+
+    function getTime() external view returns (uint256, uint256) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return ($.startTime, $.endTime);
+    }
+
+    function getToken() external view returns (address) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return $.token;
+    }
+
     function verify(bytes32[] calldata proof, bytes32 leaf) public view virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         if (isLeafUsed(leaf)) revert LeafUsed();
