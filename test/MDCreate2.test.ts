@@ -32,4 +32,9 @@ describe('MDCreate2', () => {
             await mdCreate2.simulateDeploy(2, projectId)
         )
     })
+
+    it('should revert when attempting to deploy to an existing address', async () => {
+        await mdCreate2.deploy(2, projectId)
+        await expect(mdCreate2.deploy(2, projectId)).to.be.reverted
+    })
 })

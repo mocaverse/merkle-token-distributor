@@ -15,12 +15,15 @@ enum MDType {
 }
 
 contract MDCreate2 is IVersionable {
+    mapping(string projectId => address deployment) public deployments;
+
     error UnsupportedOperation();
 
     function deploy(MDType mdType, string calldata projectId) external returns (address instance) {
         bytes memory bytecode = _getBytecodeFromEnum(mdType);
         instance = Create2.deploy(0, keccak256(abi.encode(projectId)), bytecode);
         BaseMerkleDistributor(instance).initialize(projectId);
+        deployments[projectId] = instance;
     }
 
     function simulateDeploy(MDType mdType, string calldata projectId) external view returns (address instance) {
@@ -29,7 +32,7 @@ contract MDCreate2 is IVersionable {
     }
 
     function version() external pure override returns (string memory) {
-        return "0.0.1";
+        return "0.0.2";
     }
 
     function _getBytecodeFromEnum(MDType mdType) internal pure returns (bytes memory bytecode) {
