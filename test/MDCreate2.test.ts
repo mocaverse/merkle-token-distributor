@@ -16,6 +16,24 @@ describe('MDCreate2', () => {
     beforeEach(async () => {
         const MDCreate2Factory = await ethers.getContractFactory('MDCreate2')
         mdCreate2 = await MDCreate2Factory.deploy()
+        const TokenTableMerkleDistributorFactory =
+            await ethers.getContractFactory('TokenTableMerkleDistributor')
+        const TokenTableNativeMerkleDistributorFactory =
+            await ethers.getContractFactory('TokenTableNativeMerkleDistributor')
+        const SimpleERC721MerkleDistributorFactory =
+            await ethers.getContractFactory('SimpleERC721MerkleDistributor')
+        await mdCreate2.setImplementation(
+            0,
+            await TokenTableMerkleDistributorFactory.deploy()
+        )
+        await mdCreate2.setImplementation(
+            1,
+            await TokenTableNativeMerkleDistributorFactory.deploy()
+        )
+        await mdCreate2.setImplementation(
+            2,
+            await SimpleERC721MerkleDistributorFactory.deploy()
+        )
     })
 
     it('should successfully deploy a Merkle Distributor', async () => {
