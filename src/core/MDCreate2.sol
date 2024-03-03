@@ -27,7 +27,7 @@ contract MDCreate2 is Ownable, IVersionable {
 
     function deploy(MDType mdType, string calldata projectId) external returns (address instance) {
         instance = Clones.cloneDeterministic(implementations[mdType], keccak256(abi.encode(projectId)));
-        BaseMerkleDistributor(instance).initialize(projectId);
+        BaseMerkleDistributor(instance).initialize(projectId, _msgSender());
         deployments[projectId] = instance;
     }
 
@@ -37,6 +37,6 @@ contract MDCreate2 is Ownable, IVersionable {
     }
 
     function version() external pure override returns (string memory) {
-        return "0.1.0";
+        return "0.1.1";
     }
 }

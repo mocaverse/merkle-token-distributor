@@ -86,8 +86,8 @@ abstract contract BaseMerkleDistributor is
         }
     }
 
-    function initialize(string memory projectId) public initializer {
-        __Ownable_init(_msgSender());
+    function initialize(string memory projectId, address owner_) public initializer {
+        __Ownable_init(owner_);
         __Pausable_init_unchained();
         __ReentrancyGuard_init_unchained();
         emit Initialized(projectId);
