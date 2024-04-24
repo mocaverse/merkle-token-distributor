@@ -23,17 +23,25 @@ const config: HardhatUserConfig = {
                 settings: {
                     optimizer: {
                         enabled: true,
-                        runs: 200
+                        runs: 50
                     }
                 }
             }
         ]
     },
     networks: {
-        mumbai: {
-            url: 'https://rpc.ankr.com/polygon_mumbai',
-            chainId: 80001,
+        amoy: {
+            url: 'https://rpc-amoy.polygon.technology/',
+            chainId: 80002,
             loggingEnabled: true,
+            accounts: [process.env.PRIVATE_KEY!],
+            gasPrice: 3200000000,
+            saveDeployments: true,
+            zksync: false
+        },
+        sepolia: {
+            chainId: 11155111,
+            url: `https://eth-sepolia-public.unifra.io`,
             accounts: [process.env.PRIVATE_KEY!],
             saveDeployments: true,
             zksync: false
@@ -75,15 +83,98 @@ const config: HardhatUserConfig = {
         },
         ethereum: {
             chainId: 1,
-            url: process.env.ALCHEMY_ETH_RPC!,
+            url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API!}`,
             accounts: [process.env.PRIVATE_KEY!],
             saveDeployments: true,
             zksync: false
         },
-        beraTestnet: {
-            url: 'https://rpc.ankr.com/berachain_testnet',
+        scrollSepolia: {
+            chainId: 534351,
+            url: 'https://sepolia-rpc.scroll.io/',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        scroll: {
+            chainId: 534352,
+            url: 'https://rpc.ankr.com/scroll',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        okxX1Testnet: {
+            chainId: 195,
+            url: 'https://testrpc.x1.tech/',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        base: {
+            chainId: 8453,
+            url: 'https://mainnet.base.org',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        baseSepolia: {
+            chainId: 84532,
+            url: 'https://sepolia.base.org',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        berachainTestnet: {
             chainId: 80085,
-            loggingEnabled: true,
+            url: 'https://artio.rpc.berachain.com/',
+            gasPrice: 40000,
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        plumeTestnet: {
+            chainId: 161221135,
+            url: 'https://testnet-rpc.plumenetwork.xyz/http',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        opSepolia: {
+            chainId: 11155420,
+            url: 'https://sepolia.optimism.io',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        optimism: {
+            chainId: 10,
+            url: 'https://mainnet.optimism.io',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        gnosis: {
+            url: 'https://rpc.gnosischain.com',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        chiado: {
+            url: 'https://rpc.chiadochain.net',
+            gasPrice: 1000000000,
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        arbitrumSepolia: {
+            chainId: 421614,
+            url: 'https://sepolia-rollup.arbitrum.io/rpc',
+            accounts: [process.env.PRIVATE_KEY!],
+            saveDeployments: true,
+            zksync: false
+        },
+        degen: {
+            chainId: 666666666,
+            url: 'https://rpc.degen.tips',
             accounts: [process.env.PRIVATE_KEY!],
             saveDeployments: true,
             zksync: false
@@ -91,18 +182,57 @@ const config: HardhatUserConfig = {
     },
     etherscan: {
         apiKey: {
-            beraTestnet: 'artio_testnet',
             polygon: process.env.POLYGONSCAN_KEY!,
-            polygonMumbai: process.env.POLYGONSCAN_KEY!,
+            polygonAmoy: process.env.X1_API_KEY!,
             mantaPacific: process.env.MANTAPACIFIC_KEY!,
             mantaPacificTestnet: process.env.MANTAPACIFIC_TEST_KEY!,
             avax: process.env.SNOWTRACE_KEY!,
             sepolia: process.env.ETHERSCAN_KEY!,
             mainnet: process.env.ETHERSCAN_KEY!,
             zetachainTestnet: process.env.ZETASCAN_API_KEY!,
-            zetachain: process.env.ZETASCAN_API_KEY!
+            zetachain: process.env.ZETASCAN_API_KEY!,
+            opbnb: process.env.OPBNB_API_KEY!,
+            scrollSepolia: process.env.SCROLL_API_KEY!,
+            scroll: process.env.SCROLL_API_KEY!,
+            x1: process.env.X1_API_KEY!,
+            base: process.env.BASE_API_KEY!,
+            baseSepolia: process.env.BASE_SEPOLIA_API_KEY!,
+            plumeTestnet: process.env.PLUME_TESTNET_API_KEY!,
+            berachainTestnet: process.env.BERACHAIN_TESTNET_API_KEY!,
+            opSepolia: process.env.OP_ETHERSCAN_API_KEY!,
+            optimism: process.env.OP_ETHERSCAN_API_KEY!,
+            chiado: process.env.GNOSISSCAN_API_KEY!,
+            gnosis: process.env.GNOSISSCAN_API_KEY!,
+            arbitrum: process.env.ARBITRUM_API_KEY!,
+            arbitrumSepolia: process.env.ARBITRUM_API_KEY!,
+            degen: '0'
         },
         customChains: [
+            {
+                network: 'manta',
+                chainId: 169,
+                urls: {
+                    apiURL: 'https://manta-pacific.calderaexplorer.xyz/api',
+                    browserURL: 'https://pacific-explorer.manta.network/'
+                }
+            },
+            {
+                network: 'manta_testnet',
+                chainId: 3441005,
+                urls: {
+                    apiURL: 'https://pacific-explorer.testnet.manta.network/api',
+                    browserURL:
+                        'https://pacific-explorer.testnet.manta.network/'
+                }
+            },
+            {
+                network: 'avax',
+                chainId: 43114,
+                urls: {
+                    apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan',
+                    browserURL: 'https://avascan.info/'
+                }
+            },
             {
                 network: 'zetachainTestnet',
                 chainId: 7001,
@@ -120,21 +250,125 @@ const config: HardhatUserConfig = {
                 }
             },
             {
-                network: 'beraTestnet',
+                network: 'opbnb',
+                chainId: 204,
+                urls: {
+                    apiURL: 'https://open-platform.nodereal.io/3e6ff01181534922a576386e1880d414/op-bnb-mainnet/contract/',
+                    browserURL: 'https://opbnbscan.com/'
+                }
+            },
+            {
+                network: 'scrollSepolia',
+                chainId: 534351,
+                urls: {
+                    apiURL: 'https://api-sepolia.scrollscan.com/api',
+                    browserURL: 'https://sepolia.scrollscan.com/'
+                }
+            },
+            {
+                network: 'scroll',
+                chainId: 534352,
+                urls: {
+                    apiURL: 'https://api.scrollscan.com/api',
+                    browserURL: 'https://scrollscan.com/'
+                }
+            },
+            {
+                network: 'x1',
+                chainId: 195,
+                urls: {
+                    apiURL: 'https://www.oklink.com/api/explorer/v1/contract/verify/async/api/x1_test',
+                    browserURL: 'https://www.oklink.com/x1-test'
+                }
+            },
+            {
+                network: 'baseSepolia',
+                chainId: 84532,
+                urls: {
+                    apiURL: 'https://api-sepolia.basescan.org/api',
+                    browserURL: 'https://sepolia.basescan.org'
+                }
+            },
+            {
+                network: 'plumeTestnet',
+                chainId: 161221135,
+                urls: {
+                    apiURL: 'https://testnet-explorer.plumenetwork.xyz/api',
+                    browserURL: 'https://testnet-explorer.plumenetwork.xyz/'
+                }
+            },
+            {
+                network: 'berachainTestnet',
                 chainId: 80085,
                 urls: {
-                    apiURL: 'https://api.routescan.io/v2/network/testnet/evm/80085/etherscan',
-                    browserURL: 'https://artio.beratrail.io'
+                    apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/80085/etherscan',
+                    browserURL: 'https://artio.beratrail.io/'
+                }
+            },
+            {
+                network: 'polygonAmoy',
+                chainId: 80002,
+                urls: {
+                    apiURL: 'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/AMOY_TESTNET',
+                    browserURL: 'https://www.oklink.com/amoy'
+                }
+            },
+            {
+                network: 'opSepolia',
+                chainId: 11155420,
+                urls: {
+                    apiURL: 'https://api-sepolia-optimistic.etherscan.io/api',
+                    browserURL: 'https://sepolia-optimistic.etherscan.io'
+                }
+            },
+            {
+                network: 'optimism',
+                chainId: 10,
+                urls: {
+                    apiURL: 'https://api-optimistic.etherscan.io/api',
+                    browserURL: 'https://explorer.optimism.io'
+                }
+            },
+            {
+                network: 'chiado',
+                chainId: 10200,
+                urls: {
+                    apiURL: 'https://gnosis-chiado.blockscout.com/api',
+                    browserURL: 'https://blockscout.com/gnosis/chiado'
+                }
+            },
+            {
+                network: 'gnosis',
+                chainId: 100,
+                urls: {
+                    apiURL: 'https://api.gnosisscan.io/api',
+                    browserURL: 'https://gnosisscan.io/'
+                }
+            },
+            {
+                network: 'arbitrumSepolia',
+                chainId: 421614,
+                urls: {
+                    apiURL: 'https://api-sepolia.arbiscan.io/api',
+                    browserURL: 'https://sepolia.arbiscan.io/'
+                }
+            },
+            {
+                network: 'degen',
+                chainId: 666666666,
+                urls: {
+                    apiURL: 'https://explorer.degen.tips/api',
+                    browserURL: 'https://explorer.degen.tips/'
                 }
             }
         ]
     },
-    sourcify: {
-        enabled: false
-    },
     docgen: {
         pages: 'files',
-        exclude: []
+        exclude: ['libraries', 'mock']
+    },
+    sourcify: {
+        enabled: false
     }
 }
 

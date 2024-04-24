@@ -6,6 +6,8 @@ coverage
 node_modules
 out
 typechain-types
+artifacts
+deployments
 
 # files
 *.env
