@@ -142,7 +142,7 @@ abstract contract BaseMerkleDistributor is
 
     function setFeeToken(address feeToken) external virtual onlyOwner onlyNotLocked {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.feeCollector = feeToken;
+        $.feeToken = feeToken;
         emit FeeTokenSet(feeToken);
     }
 
