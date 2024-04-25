@@ -175,6 +175,9 @@ abstract contract BaseMerkleDistributor is
         renounceOwnership();
     }
 
+    // solhint-disable no-empty-blocks
+    function withdraw(bytes memory extraData) external virtual { }
+
     function version() external pure returns (string memory) {
         return "0.0.2";
     }

@@ -18,6 +18,11 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
 
     error ClaimPremature();
 
+    function withdraw(bytes memory) external virtual override onlyOwner {
+        IERC20 token = IERC20(_getBaseMerkleDistributorStorage().token);
+        token.safeTransfer(owner(), token.balanceOf(address(this)));
+    }
+
     function decodeLeafData(bytes memory data) public pure returns (TokenTableMerkleDistributorData memory) {
         return abi.decode(data, (TokenTableMerkleDistributorData));
     }
