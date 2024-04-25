@@ -107,14 +107,12 @@ abstract contract BaseMerkleDistributor is
 
     function setRoot(bytes32 root, uint256 deadline) external onlyOwner onlyNotLocked {
         if (deadline < block.timestamp) revert RootExpired();
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.root = root;
+        _getBaseMerkleDistributorStorage().root = root;
         emit RootSet();
     }
 
     function lockRoot() external onlyOwner {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.rootLocked = true;
+        _getBaseMerkleDistributorStorage().rootLocked = true;
         emit RootLocked();
     }
 
@@ -129,10 +127,9 @@ abstract contract BaseMerkleDistributor is
     }
 
     function setStartEndTime(uint256 startTime, uint256 endTime) external onlyOwner onlyNotLocked {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         if (startTime >= endTime) revert UnsupportedOperation();
-        $.startTime = startTime;
-        $.endTime = endTime;
+        _getBaseMerkleDistributorStorage().startTime = startTime;
+        _getBaseMerkleDistributorStorage().endTime = endTime;
         emit TimeSet();
     }
 
@@ -141,14 +138,12 @@ abstract contract BaseMerkleDistributor is
     }
 
     function setFeeToken(address feeToken) external virtual onlyOwner onlyNotLocked {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.feeToken = feeToken;
+        _getBaseMerkleDistributorStorage().feeToken = feeToken;
         emit FeeTokenSet(feeToken);
     }
 
     function setFeeCollector(address feeCollector) external virtual onlyOwner onlyNotLocked {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.feeCollector = feeCollector;
+        _getBaseMerkleDistributorStorage().feeCollector = feeCollector;
         emit FeeCollectorSet(feeCollector);
     }
 
@@ -210,44 +205,36 @@ abstract contract BaseMerkleDistributor is
     }
 
     function getClaimDelegate() external view returns (address) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return $.claimDelegate;
+        return _getBaseMerkleDistributorStorage().claimDelegate;
     }
 
     function getRoot() external view returns (bytes32) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return $.root;
+        return _getBaseMerkleDistributorStorage().root;
     }
 
     function getRootLocked() external view returns (bool) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return $.rootLocked;
+        return _getBaseMerkleDistributorStorage().rootLocked;
     }
 
     function getTime() external view returns (uint256, uint256) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return ($.startTime, $.endTime);
+        return (_getBaseMerkleDistributorStorage().startTime, _getBaseMerkleDistributorStorage().endTime);
     }
 
     function getToken() external view returns (address) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return $.token;
+        return _getBaseMerkleDistributorStorage().token;
     }
 
     function getFeeToken() external view returns (address) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return $.feeToken;
+        return _getBaseMerkleDistributorStorage().feeToken;
     }
 
     function getFeeCollector() external view returns (address) {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        return $.feeCollector;
+        return _getBaseMerkleDistributorStorage().feeCollector;
     }
 
     function verify(bytes32[] calldata proof, bytes32 leaf) public view virtual {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         if (isLeafUsed(leaf)) revert LeafUsed();
-        if (!proof.verifyCalldata($.root, leaf)) revert InvalidProof();
+        if (!proof.verifyCalldata(_getBaseMerkleDistributorStorage().root, leaf)) revert InvalidProof();
     }
 
     function isLeafUsed(bytes32 leaf) public view virtual returns (bool) {
