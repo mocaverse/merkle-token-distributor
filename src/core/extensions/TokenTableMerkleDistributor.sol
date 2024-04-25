@@ -35,6 +35,7 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
     )
         internal
         override
+        returns (uint256 claimedAmount)
     {
         bytes32 leaf = encodeLeaf(recipient, group, data);
         verify(proof, leaf);
@@ -43,6 +44,7 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
         if (decodedData.claimableTimestamp > block.timestamp) revert ClaimPremature();
         _send(recipient, _getBaseMerkleDistributorStorage().token, decodedData.claimableAmount);
         emit Claimed(recipient, _getBaseMerkleDistributorStorage().token, group, decodedData.claimableAmount);
+        return decodedData.claimableAmount;
     }
 
     function _send(address recipient, address token, uint256 amount) internal virtual override {

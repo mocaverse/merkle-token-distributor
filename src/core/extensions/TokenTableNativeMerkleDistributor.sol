@@ -12,7 +12,7 @@ contract TokenTableNativeMerkleDistributor is TokenTableMerkleDistributor {
 
     function withdraw(bytes memory) external virtual override onlyOwner {
         (bool success, bytes memory data) = owner().call{ value: address(this).balance }("");
-        // solhint-disable custom-errors
+        // solhint-disable-next-line custom-errors
         require(success, string(data));
     }
 

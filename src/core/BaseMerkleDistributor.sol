@@ -7,6 +7,9 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import { IVersionable } from "../interfaces/IVersionable.sol";
+import { ITTUFeeCollector } from "@ethsign/tokentable-evm-contracts/contracts/interfaces/ITTUFeeCollector.sol";
+import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 abstract contract BaseMerkleDistributor is
     OwnableUpgradeable,
@@ -16,6 +19,7 @@ abstract contract BaseMerkleDistributor is
     IVersionable
 {
     using MerkleProof for bytes32[];
+    using SafeERC20 for IERC20;
 
     /// @custom:storage-location erc7201:ethsign.misc.BaseMerkleDistributor
     struct BaseMerkleDistributorStorage {
@@ -23,6 +27,8 @@ abstract contract BaseMerkleDistributor is
         bytes32 root;
         address token;
         address claimDelegate;
+        address feeToken;
+        address feeCollector;
         uint256 startTime;
         uint256 endTime;
         bool rootLocked;
@@ -38,6 +44,8 @@ abstract contract BaseMerkleDistributor is
     event TokenSet(address token);
     event ClaimDelegateSet(address delegate);
     event TimeSet();
+    event FeeTokenSet(address feeToken);
+    event FeeCollectorSet(address feeCollector);
 
     error UnsupportedOperation();
     error RootExpired();
@@ -122,6 +130,7 @@ abstract contract BaseMerkleDistributor is
 
     function setStartEndTime(uint256 startTime, uint256 endTime) external onlyOwner onlyNotLocked {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        if (startTime >= endTime) revert UnsupportedOperation();
         $.startTime = startTime;
         $.endTime = endTime;
         emit TimeSet();
@@ -131,20 +140,33 @@ abstract contract BaseMerkleDistributor is
         revert UnsupportedOperation();
     }
 
+    function setFeeToken(address feeToken) external virtual onlyOwner onlyNotLocked {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        $.feeCollector = feeToken;
+        emit FeeTokenSet(feeToken);
+    }
+
+    function setFeeCollector(address feeCollector) external virtual onlyOwner onlyNotLocked {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        $.feeCollector = feeCollector;
+        emit FeeCollectorSet(feeCollector);
+    }
+
     function claim(
         bytes32[] calldata proof,
         bytes32 group,
         bytes calldata data
     )
         external
+        payable
         virtual
         whenNotPaused
         onlyLocked
         onlyActive
         nonReentrant
     {
-        _verifyAndClaim(_msgSender(), proof, group, data);
-        _afterClaim();
+        uint256 claimedAmount = _verifyAndClaim(_msgSender(), proof, group, data);
+        _afterClaim(_msgSender(), proof, group, data, claimedAmount);
     }
 
     function delegateClaim(
@@ -154,6 +176,7 @@ abstract contract BaseMerkleDistributor is
         bytes calldata data
     )
         external
+        payable
         virtual
         whenNotPaused
         onlyDelegate
@@ -161,8 +184,8 @@ abstract contract BaseMerkleDistributor is
         onlyActive
         nonReentrant
     {
-        _verifyAndClaim(recipient, proof, group, data);
-        _afterDelegateClaim();
+        uint256 claimedAmount = _verifyAndClaim(recipient, proof, group, data);
+        _afterDelegateClaim(recipient, proof, group, data, claimedAmount);
     }
 
     function nuke() external virtual whenPaused onlyOwner {
@@ -179,7 +202,7 @@ abstract contract BaseMerkleDistributor is
     function withdraw(bytes memory extraData) external virtual { }
 
     function version() external pure returns (string memory) {
-        return "0.0.2";
+        return "0.1.0";
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
@@ -211,6 +234,16 @@ abstract contract BaseMerkleDistributor is
         return $.token;
     }
 
+    function getFeeToken() external view returns (address) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return $.feeToken;
+    }
+
+    function getFeeCollector() external view returns (address) {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        return $.feeCollector;
+    }
+
     function verify(bytes32[] calldata proof, bytes32 leaf) public view virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         if (isLeafUsed(leaf)) revert LeafUsed();
@@ -228,15 +261,49 @@ abstract contract BaseMerkleDistributor is
         bytes calldata data
     )
         internal
-        virtual;
+        virtual
+        returns (uint256 claimedAmount);
 
     function _send(address recipient, address token, uint256 amount) internal virtual;
 
-    // solhint-disable-next-line no-empty-blocks
-    function _afterClaim() internal virtual { }
+    function _chargeFees(uint256 claimedAmount) internal virtual {
+        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
+        if ($.feeCollector == address(0)) return;
+        uint256 amountToCharge = ITTUFeeCollector($.feeCollector).getFee(address(this), claimedAmount);
+        if ($.feeToken == address(0)) {
+            (bool success, bytes memory data) = $.feeCollector.call{ value: amountToCharge }("");
+            // solhint-disable-next-line custom-errors
+            require(success, string(data));
+        } else {
+            IERC20($.feeToken).safeTransfer($.feeCollector, amountToCharge);
+        }
+    }
 
-    // solhint-disable-next-line no-empty-blocks
-    function _afterDelegateClaim() internal virtual { }
+    function _afterClaim(
+        address, // recipient
+        bytes32[] calldata, // proof
+        bytes32, // group
+        bytes calldata, // data
+        uint256 claimedAmount
+    )
+        internal
+        virtual
+    {
+        _chargeFees(claimedAmount);
+    }
+
+    function _afterDelegateClaim(
+        address, // recipient
+        bytes32[] calldata, // proof
+        bytes32, // group
+        bytes calldata, // data
+        uint256 claimedAmount
+    )
+        internal
+        virtual
+    {
+        _chargeFees(claimedAmount);
+    }
 
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner { }

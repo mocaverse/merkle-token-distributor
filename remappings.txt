@@ -3,3 +3,4 @@
 erc721a-upgradeable/contracts/=node_modules/erc721a-upgradeable/contracts
 ds-test/=node_modules/ds-test/src
 forge-std/=node_modules/forge-std/src
+@ethsign/tokentable-evm-contracts/=node_modules/@ethsign/tokentable-evm-contracts/

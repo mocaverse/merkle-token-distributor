@@ -25,7 +25,8 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "5.0.1",
-    "@openzeppelin/contracts-upgradeable": "5.0.1"
+    "@openzeppelin/contracts-upgradeable": "5.0.1",
+    "@ethsign/tokentable-evm-contracts": "2.5.7"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.1.1",
