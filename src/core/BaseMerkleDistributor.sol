@@ -206,7 +206,7 @@ abstract contract BaseMerkleDistributor is
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
-        return keccak256(abi.encode(address(this), user, group, data));
+        return keccak256(abi.encode(block.chainid, address(this), user, group, data));
     }
 
     function getClaimDelegate() external view returns (address) {
