@@ -2,7 +2,6 @@
 pragma solidity ^0.8.24;
 
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
@@ -13,7 +12,6 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 
 abstract contract BaseMerkleDistributor is
     OwnableUpgradeable,
-    PausableUpgradeable,
     ReentrancyGuardUpgradeable,
     UUPSUpgradeable,
     IVersionable
@@ -31,7 +29,6 @@ abstract contract BaseMerkleDistributor is
         address feeCollector;
         uint256 startTime;
         uint256 endTime;
-        bool rootLocked;
     }
 
     // keccak256(abi.encode(uint256(keccak256("ethsign.misc.BaseMerkleDistributor")) - 1)) & ~bytes32(uint256(0xff))
@@ -39,43 +36,17 @@ abstract contract BaseMerkleDistributor is
         0x452bdf2c9fe836ad357e55ed0859c19d2ac2a2c151d216523e3d37a8b9a03f00;
 
     event Initialized(string projectId);
-    event RootSet();
-    event RootLocked();
-    event TokenSet(address token);
     event ClaimDelegateSet(address delegate);
-    event TimeSet();
-    event FeeTokenSet(address feeToken);
-    event FeeCollectorSet(address feeCollector);
 
     error UnsupportedOperation();
-    error RootExpired();
-    error RootIsLocked();
-    error RootNotLocked();
     error TimeInactive();
     error InvalidProof();
     error LeafUsed();
 
-    function _getBaseMerkleDistributorStorage() internal pure returns (BaseMerkleDistributorStorage storage $) {
-        assembly {
-            $.slot := BaseMerkleDistributorStorageLocation
-        }
-    }
-
-    // solhint-disable-next-line ordering
     modifier onlyDelegate() {
         if (_msgSender() != _getBaseMerkleDistributorStorage().claimDelegate) {
             revert OwnableUnauthorizedAccount(_msgSender());
         }
-        _;
-    }
-
-    modifier onlyNotLocked() {
-        if (_getBaseMerkleDistributorStorage().rootLocked) revert RootIsLocked();
-        _;
-    }
-
-    modifier onlyLocked() {
-        if (!_getBaseMerkleDistributorStorage().rootLocked) revert RootNotLocked();
         _;
     }
 
@@ -96,55 +67,13 @@ abstract contract BaseMerkleDistributor is
 
     function initialize(string memory projectId, address owner_) public initializer {
         __Ownable_init(owner_);
-        __Pausable_init_unchained();
         __ReentrancyGuard_init_unchained();
         emit Initialized(projectId);
-    }
-
-    function setPause(bool shouldPause) external onlyOwner {
-        shouldPause ? _pause() : _unpause();
-    }
-
-    function setRoot(bytes32 root, uint256 deadline) external onlyOwner onlyNotLocked {
-        if (deadline < block.timestamp) revert RootExpired();
-        _getBaseMerkleDistributorStorage().root = root;
-        emit RootSet();
-    }
-
-    function lockRoot() external onlyOwner {
-        _getBaseMerkleDistributorStorage().rootLocked = true;
-        emit RootLocked();
-    }
-
-    function setToken(address token) external virtual onlyOwner onlyNotLocked {
-        _getBaseMerkleDistributorStorage().token = token;
-        emit TokenSet(token);
     }
 
     function setClaimDelegate(address delegate) external onlyOwner {
         _getBaseMerkleDistributorStorage().claimDelegate = delegate;
         emit ClaimDelegateSet(delegate);
-    }
-
-    function setStartEndTime(uint256 startTime, uint256 endTime) external onlyOwner onlyNotLocked {
-        if (startTime >= endTime) revert UnsupportedOperation();
-        _getBaseMerkleDistributorStorage().startTime = startTime;
-        _getBaseMerkleDistributorStorage().endTime = endTime;
-        emit TimeSet();
-    }
-
-    function setHook(address) external virtual onlyOwner onlyNotLocked {
-        revert UnsupportedOperation();
-    }
-
-    function setFeeToken(address feeToken) external virtual onlyOwner onlyNotLocked {
-        _getBaseMerkleDistributorStorage().feeToken = feeToken;
-        emit FeeTokenSet(feeToken);
-    }
-
-    function setFeeCollector(address feeCollector) external virtual onlyOwner onlyNotLocked {
-        _getBaseMerkleDistributorStorage().feeCollector = feeCollector;
-        emit FeeCollectorSet(feeCollector);
     }
 
     function claim(
@@ -155,8 +84,6 @@ abstract contract BaseMerkleDistributor is
         external
         payable
         virtual
-        whenNotPaused
-        onlyLocked
         onlyActive
         nonReentrant
     {
@@ -173,9 +100,7 @@ abstract contract BaseMerkleDistributor is
         external
         payable
         virtual
-        whenNotPaused
         onlyDelegate
-        onlyLocked
         onlyActive
         nonReentrant
     {
@@ -183,7 +108,7 @@ abstract contract BaseMerkleDistributor is
         _afterDelegateClaim(recipient, proof, group, data, claimedAmount);
     }
 
-    function nuke() external virtual whenPaused onlyOwner {
+    function nuke() external virtual onlyOwner {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         $.root = 0;
         $.token = address(0);
@@ -196,24 +121,12 @@ abstract contract BaseMerkleDistributor is
     // solhint-disable no-empty-blocks
     function withdraw(bytes memory extraData) external virtual { }
 
-    function version() external pure returns (string memory) {
-        return "0.1.0";
-    }
-
-    function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
-        return keccak256(abi.encode(block.chainid, address(this), user, group, data));
-    }
-
     function getClaimDelegate() external view returns (address) {
         return _getBaseMerkleDistributorStorage().claimDelegate;
     }
 
     function getRoot() external view returns (bytes32) {
         return _getBaseMerkleDistributorStorage().root;
-    }
-
-    function getRootLocked() external view returns (bool) {
-        return _getBaseMerkleDistributorStorage().rootLocked;
     }
 
     function getTime() external view returns (uint256, uint256) {
@@ -230,6 +143,26 @@ abstract contract BaseMerkleDistributor is
 
     function getFeeCollector() external view returns (address) {
         return _getBaseMerkleDistributorStorage().feeCollector;
+    }
+
+    function version() external pure returns (string memory) {
+        return "0.2.0";
+    }
+
+    function setBaseParams(address token, uint256 startTime, uint256 endTime) public virtual onlyOwner {
+        if (startTime >= endTime) revert UnsupportedOperation();
+        _getBaseMerkleDistributorStorage().token = token;
+        _getBaseMerkleDistributorStorage().startTime = startTime;
+        _getBaseMerkleDistributorStorage().endTime = endTime;
+    }
+
+    function setFeeParams(address feeToken, address feeCollector) public virtual onlyOwner {
+        _getBaseMerkleDistributorStorage().feeToken = feeToken;
+        _getBaseMerkleDistributorStorage().feeCollector = feeCollector;
+    }
+
+    function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
+        return keccak256(abi.encode(block.chainid, address(this), user, group, data));
     }
 
     function verify(bytes32[] calldata proof, bytes32 leaf) public view virtual {
@@ -294,4 +227,10 @@ abstract contract BaseMerkleDistributor is
 
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner { }
+
+    function _getBaseMerkleDistributorStorage() internal pure returns (BaseMerkleDistributorStorage storage $) {
+        assembly {
+            $.slot := BaseMerkleDistributorStorageLocation
+        }
+    }
 }

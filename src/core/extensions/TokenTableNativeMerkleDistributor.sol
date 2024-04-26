@@ -6,14 +6,15 @@ import { TokenTableMerkleDistributor } from "./TokenTableMerkleDistributor.sol";
 contract TokenTableNativeMerkleDistributor is TokenTableMerkleDistributor {
     receive() external payable { }
 
-    function setToken(address) external virtual override onlyOwner {
-        revert UnsupportedOperation();
-    }
-
     function withdraw(bytes memory) external virtual override onlyOwner {
         (bool success, bytes memory data) = owner().call{ value: address(this).balance }("");
         // solhint-disable-next-line custom-errors
         require(success, string(data));
+    }
+
+    function setBaseParams(address token, uint256 startTime, uint256 endTime) public virtual override onlyOwner {
+        super.setBaseParams(token, startTime, endTime);
+        if (token != address(0)) revert UnsupportedOperation();
     }
 
     function _send(address recipient, address, uint256 amount) internal virtual override {
