@@ -12,8 +12,18 @@ contract TokenTableNativeMerkleDistributor is TokenTableMerkleDistributor {
         require(success, string(data));
     }
 
-    function setBaseParams(address token, uint256 startTime, uint256 endTime) public virtual override onlyOwner {
-        super.setBaseParams(token, startTime, endTime);
+    function setBaseParams(
+        address token,
+        uint256 startTime,
+        uint256 endTime,
+        bytes32 root
+    )
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        super.setBaseParams(token, startTime, endTime, root);
         if (token != address(0)) revert UnsupportedOperation();
     }
 

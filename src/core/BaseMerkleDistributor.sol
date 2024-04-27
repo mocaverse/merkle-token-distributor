@@ -151,11 +151,12 @@ abstract contract BaseMerkleDistributor is
         return "0.2.0";
     }
 
-    function setBaseParams(address token, uint256 startTime, uint256 endTime) public virtual onlyOwner {
+    function setBaseParams(address token, uint256 startTime, uint256 endTime, bytes32 root) public virtual onlyOwner {
         if (startTime >= endTime) revert UnsupportedOperation();
         _getBaseMerkleDistributorStorage().token = token;
         _getBaseMerkleDistributorStorage().startTime = startTime;
         _getBaseMerkleDistributorStorage().endTime = endTime;
+        _getBaseMerkleDistributorStorage().root = root;
     }
 
     function setFeeParams(address feeToken, address feeCollector) public virtual onlyOwner {
