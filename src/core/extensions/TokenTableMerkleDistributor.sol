@@ -50,4 +50,8 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
     function _send(address recipient, address token, uint256 amount) internal virtual override {
         IERC20(token).safeTransfer(recipient, amount);
     }
+
+    function _balanceOfSelf() internal view virtual override returns (uint256 balance) {
+        return IERC20(_getBaseMerkleDistributorStorage().token).balanceOf(address(this));
+    }
 }

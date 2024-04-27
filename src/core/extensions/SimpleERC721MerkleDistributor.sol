@@ -18,4 +18,8 @@ contract SimpleERC721MerkleDistributor is TokenTableMerkleDistributor {
             IERC721SafeMintable(token).safeMint(recipient);
         }
     }
+
+    function _balanceOfSelf() internal view virtual override returns (uint256 balance) {
+        return IERC721(_getBaseMerkleDistributorStorage().token).balanceOf(address(this));
+    }
 }
