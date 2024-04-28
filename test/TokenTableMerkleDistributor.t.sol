@@ -203,7 +203,7 @@ contract TokenTableMerkleDistributorTest is Test {
             users, groups, indexes, claimableTimestamps, claimableAmounts
         );
         instance.setBaseParams(
-            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1], root
+            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
         );
         for (uint256 i = 0; i < leaves.length; i++) {
             _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
@@ -245,7 +245,7 @@ contract TokenTableMerkleDistributorTest is Test {
             users, groups, indexes, claimableTimestamps, claimableAmounts
         );
         instance.setBaseParams(
-            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1], root
+            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
         );
         instance.setClaimDelegate(delegate);
         for (uint256 i = 0; i < leaves.length; i++) {
