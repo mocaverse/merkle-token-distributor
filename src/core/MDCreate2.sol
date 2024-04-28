@@ -38,6 +38,6 @@ contract MDCreate2 is Ownable, IVersionable {
     }
 
     function version() external pure override returns (string memory) {
-        return "0.1.1";
+        return "0.1.2";
     }
 }
