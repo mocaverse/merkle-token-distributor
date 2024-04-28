@@ -37,6 +37,7 @@ abstract contract BaseMerkleDistributor is
 
     event Initialized(string projectId);
     event ClaimDelegateSet(address delegate);
+    event Claimed(address recipient, bytes data);
 
     error UnsupportedOperation();
     error TimeInactive();
@@ -90,6 +91,7 @@ abstract contract BaseMerkleDistributor is
     {
         uint256 claimedAmount = _verifyAndClaim(_msgSender(), proof, group, data);
         _afterClaim(_msgSender(), proof, group, data, claimedAmount);
+        emit Claimed(_msgSender(), data);
     }
 
     function delegateClaim(
@@ -107,6 +109,7 @@ abstract contract BaseMerkleDistributor is
     {
         uint256 claimedAmount = _verifyAndClaim(recipient, proof, group, data);
         _afterDelegateClaim(recipient, proof, group, data, claimedAmount);
+        emit Claimed(recipient, data);
     }
 
     function nuke(bool forfeitTokens) external virtual onlyOwner {
