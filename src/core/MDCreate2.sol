@@ -26,6 +26,7 @@ contract MDCreate2 is Ownable, IVersionable {
     }
 
     function deploy(MDType mdType, string calldata projectId) external returns (address instance) {
+        if (deployments[projectId] != address(0)) revert UnsupportedOperation();
         instance = Clones.cloneDeterministic(implementations[mdType], keccak256(abi.encode(projectId)));
         BaseMerkleDistributor(instance).initialize(projectId, _msgSender());
         deployments[projectId] = instance;
