@@ -43,7 +43,6 @@ abstract contract BaseMerkleDistributor is
     error TimeInactive();
     error InvalidProof();
     error LeafUsed();
-    error TokenBalancePositive();
 
     modifier onlyDelegate() {
         if (_msgSender() != _getBaseMerkleDistributorStorage().claimDelegate) {
@@ -110,17 +109,6 @@ abstract contract BaseMerkleDistributor is
         uint256 claimedAmount = _verifyAndClaim(recipient, proof, group, data);
         _afterDelegateClaim(recipient, proof, group, data, claimedAmount);
         emit Claimed(recipient, data);
-    }
-
-    function nuke(bool forfeitTokens) external virtual onlyOwner {
-        if (!forfeitTokens && _balanceOfSelf() > 0) revert TokenBalancePositive();
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.root = 0;
-        $.token = address(0);
-        $.claimDelegate = address(0);
-        $.startTime = 0;
-        $.endTime = 0;
-        renounceOwnership();
     }
 
     // solhint-disable no-empty-blocks
