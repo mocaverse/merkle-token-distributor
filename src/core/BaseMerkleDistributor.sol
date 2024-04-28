@@ -43,6 +43,7 @@ abstract contract BaseMerkleDistributor is
     error TimeInactive();
     error InvalidProof();
     error LeafUsed();
+    error IncorrectFees();
 
     modifier onlyDelegate() {
         if (_msgSender() != _getBaseMerkleDistributorStorage().claimDelegate) {
@@ -180,21 +181,23 @@ abstract contract BaseMerkleDistributor is
 
     function _send(address recipient, address token, uint256 amount) internal virtual;
 
-    function _chargeFees(uint256 claimedAmount) internal virtual {
+    function _chargeFees(address recipient, uint256 claimedAmount) internal virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         if ($.feeCollector == address(0)) return;
         uint256 amountToCharge = ITTUFeeCollector($.feeCollector).getFee(address(this), claimedAmount);
         if ($.feeToken == address(0)) {
+            if (msg.value != amountToCharge) revert IncorrectFees();
             (bool success, bytes memory data) = $.feeCollector.call{ value: amountToCharge }("");
             // solhint-disable-next-line custom-errors
             require(success, string(data));
         } else {
+            IERC20($.feeToken).safeTransferFrom(recipient, address(this), amountToCharge);
             IERC20($.feeToken).safeTransfer($.feeCollector, amountToCharge);
         }
     }
 
     function _afterClaim(
-        address, // recipient
+        address recipient,
         bytes32[] calldata, // proof
         bytes32, // group
         bytes calldata, // data
@@ -203,11 +206,11 @@ abstract contract BaseMerkleDistributor is
         internal
         virtual
     {
-        _chargeFees(claimedAmount);
+        _chargeFees(recipient, claimedAmount);
     }
 
     function _afterDelegateClaim(
-        address, // recipient
+        address recipient,
         bytes32[] calldata, // proof
         bytes32, // group
         bytes calldata, // data
@@ -216,7 +219,7 @@ abstract contract BaseMerkleDistributor is
         internal
         virtual
     {
-        _chargeFees(claimedAmount);
+        _chargeFees(recipient, claimedAmount);
     }
 
     // solhint-disable-next-line no-empty-blocks

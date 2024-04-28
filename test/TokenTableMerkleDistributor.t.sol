@@ -2,7 +2,7 @@
 // solhint-disable ordering
 pragma solidity ^0.8.20;
 
-import { Test } from "forge-std/Test.sol";
+import { Test, console } from "forge-std/Test.sol";
 import {
     TokenTableMerkleDistributor,
     TokenTableMerkleDistributorData
@@ -11,18 +11,25 @@ import { Merkle } from "../src/libs/murky/Merkle.sol";
 import { MockERC20 } from "../src/mock/MockERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { TTUFeeCollector } from "../src/libs/tokentable/core/TTUFeeCollector.sol";
 
 contract TokenTableMerkleDistributorTest is Test {
     using SafeERC20 for IERC20;
 
     TokenTableMerkleDistributor public instance;
-    Merkle public merkleUtil = new Merkle();
+    Merkle public merkleUtil;
     IERC20 public mockErc20;
+    TTUFeeCollector public ttuFeeCollector;
+    IERC20 public feeToken;
+    uint256 public fixedFee;
 
     error UnsupportedOperation();
     error TimeInactive();
     error InvalidProof();
     error LeafUsed();
+    error IncorrectFees();
+
+    error ClaimPremature();
 
     // Ownable
     error OwnableUnauthorizedAccount(address account);
@@ -30,7 +37,11 @@ contract TokenTableMerkleDistributorTest is Test {
     function setUp() public {
         instance = new TokenTableMerkleDistributor();
         instance.initialize("", address(this));
+        merkleUtil = new Merkle();
         mockErc20 = new MockERC20();
+        ttuFeeCollector = new TTUFeeCollector();
+        feeToken = new MockERC20();
+        fixedFee = 1 ether;
     }
 
     function testFuzz_setBaseParams_fail_badTime(
@@ -71,16 +82,16 @@ contract TokenTableMerkleDistributorTest is Test {
         assertEq(instance.getRoot(), root);
     }
 
-    function testFuzz_setFeeParams_fail_notOwner(address notOwner, address feeToken, address feeCollector) public {
+    function testFuzz_setFeeParams_fail_notOwner(address notOwner, address feeToken_, address feeCollector) public {
         vm.assume(notOwner != address(this));
         vm.prank(notOwner);
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, notOwner));
-        instance.setFeeParams(feeToken, feeCollector);
+        instance.setFeeParams(feeToken_, feeCollector);
     }
 
-    function testFuzz_setFeeParams_succeed_0(address feeToken, address feeCollector) public {
-        instance.setFeeParams(feeToken, feeCollector);
-        assertEq(instance.getFeeToken(), feeToken);
+    function testFuzz_setFeeParams_succeed_0(address feeToken_, address feeCollector) public {
+        instance.setFeeParams(feeToken_, feeCollector);
+        assertEq(instance.getFeeToken(), feeToken_);
         assertEq(instance.getFeeCollector(), feeCollector);
     }
 
@@ -201,13 +212,18 @@ contract TokenTableMerkleDistributorTest is Test {
         _getLeavesAndProofFromDataset_uncheckedInput_amount_uint128(
             users, groups, indexes, claimableTimestamps, claimableAmounts
         );
-        instance.setBaseParams(
-            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
-        );
+        instance.setBaseParams(address(mockErc20), 0, claimableTimestamps[claimableTimestamps.length - 1] + 1, root);
         for (uint256 i = 0; i < leaves.length; i++) {
             _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
             bytes32[] memory proof = merkleUtil.getProof(leaves, i);
             uint256 balanceBefore = mockErc20.balanceOf(users[i]);
+            if (claimableTimestamps[i] > 0) {
+                // Block early claims
+                vm.warp(claimableTimestamps[i] - 1);
+                vm.prank(users[i]);
+                vm.expectRevert(abi.encodeWithSelector(ClaimPremature.selector));
+                instance.claim(proof, groups[i % groups.length], datas[i]);
+            }
             vm.warp(claimableTimestamps[i]);
             // Block invalid proofs
             vm.prank(address(0));
@@ -276,6 +292,94 @@ contract TokenTableMerkleDistributorTest is Test {
             // Block double-claim attempt
             vm.expectRevert(abi.encodeWithSelector(LeafUsed.selector));
             instance.delegateClaim(users[i], proof, groups[i % groups.length], datas[i]);
+        }
+    }
+
+    function testFuzz_externalTTUFeeCollector_etherFees(
+        address[] memory users,
+        bytes32[] memory groups,
+        uint256[] memory indexes,
+        uint64[] memory claimableTimestampDeltas,
+        uint128[] memory claimableAmounts
+    )
+        public
+    {
+        vm.assume(
+            users.length > 1 && groups.length > 0 && indexes.length > 0 && claimableTimestampDeltas.length > 1
+                && claimableAmounts.length > 0
+        );
+        users[0] = address(123_456_789);
+        uint256[] memory claimableTimestamps = new uint256[](users.length);
+        claimableTimestamps[0] = claimableTimestampDeltas[0];
+        for (uint256 i = 1; i < users.length; i++) {
+            if (users[i] == address(0)) users[i] = address(123_456_789);
+            claimableTimestamps[i] =
+                claimableTimestamps[i - 1] + claimableTimestampDeltas[i % claimableTimestampDeltas.length];
+        }
+        (bytes[] memory datas, bytes32[] memory leaves, bytes32 root) =
+        _getLeavesAndProofFromDataset_uncheckedInput_amount_uint128(
+            users, groups, indexes, claimableTimestamps, claimableAmounts
+        );
+        instance.setBaseParams(
+            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
+        );
+        instance.setFeeParams(address(0), address(ttuFeeCollector));
+        ttuFeeCollector.setCustomFeeFixed(address(instance), fixedFee);
+        for (uint256 i = 0; i < leaves.length; i++) {
+            _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
+            bytes32[] memory proof = merkleUtil.getProof(leaves, i);
+            vm.warp(claimableTimestamps[i]);
+            vm.deal(users[i], fixedFee * 2); // just in case
+            vm.prank(users[i]);
+            vm.expectRevert(abi.encodeWithSelector(IncorrectFees.selector));
+            instance.claim{ value: 0 }(proof, groups[i % groups.length], datas[i]);
+            vm.prank(users[i]);
+            instance.claim{ value: fixedFee }(proof, groups[i % groups.length], datas[i]);
+        }
+    }
+
+    function testFuzz_externalTTUFeeCollector_erc20Fees(
+        address[] memory users,
+        bytes32[] memory groups,
+        uint256[] memory indexes,
+        uint64[] memory claimableTimestampDeltas,
+        uint128[] memory claimableAmounts
+    )
+        public
+    {
+        vm.assume(
+            users.length > 1 && groups.length > 0 && indexes.length > 0 && claimableTimestampDeltas.length > 1
+                && claimableAmounts.length > 0
+        );
+        users[0] = address(123_456_789);
+        uint256[] memory claimableTimestamps = new uint256[](users.length);
+        claimableTimestamps[0] = claimableTimestampDeltas[0];
+        for (uint256 i = 1; i < users.length; i++) {
+            if (users[i] == address(0)) users[i] = address(123_456_789);
+            claimableTimestamps[i] =
+                claimableTimestamps[i - 1] + claimableTimestampDeltas[i % claimableTimestampDeltas.length];
+        }
+        (bytes[] memory datas, bytes32[] memory leaves, bytes32 root) =
+        _getLeavesAndProofFromDataset_uncheckedInput_amount_uint128(
+            users, groups, indexes, claimableTimestamps, claimableAmounts
+        );
+        instance.setBaseParams(
+            address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
+        );
+        instance.setFeeParams(address(feeToken), address(ttuFeeCollector));
+        ttuFeeCollector.setCustomFeeFixed(address(instance), fixedFee);
+        for (uint256 i = 0; i < leaves.length; i++) {
+            _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
+            bytes32[] memory proof = merkleUtil.getProof(leaves, i);
+            vm.warp(claimableTimestamps[i]);
+            MockERC20(address(feeToken)).mint(users[i], fixedFee);
+            vm.prank(users[i]);
+            vm.expectRevert(); // not enough allowance
+            instance.claim(proof, groups[i % groups.length], datas[i]);
+            vm.prank(users[i]);
+            feeToken.approve(address(instance), fixedFee);
+            vm.prank(users[i]);
+            instance.claim(proof, groups[i % groups.length], datas[i]);
         }
     }
 
