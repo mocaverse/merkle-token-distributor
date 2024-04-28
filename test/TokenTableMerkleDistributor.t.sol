@@ -23,7 +23,6 @@ contract TokenTableMerkleDistributorTest is Test {
     error TimeInactive();
     error InvalidProof();
     error LeafUsed();
-    error TokenBalancePositive();
 
     // Ownable
     error OwnableUnauthorizedAccount(address account);
@@ -209,12 +208,21 @@ contract TokenTableMerkleDistributorTest is Test {
             _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
             bytes32[] memory proof = merkleUtil.getProof(leaves, i);
             uint256 balanceBefore = mockErc20.balanceOf(users[i]);
-            vm.prank(users[i]);
             vm.warp(claimableTimestamps[i]);
+            // Block invalid proofs
+            vm.prank(address(0));
+            vm.expectRevert(abi.encodeWithSelector(InvalidProof.selector));
+            instance.claim(proof, groups[i % groups.length], datas[i]);
+            // Claim normally
+            vm.prank(users[i]);
             instance.claim(proof, groups[i % groups.length], datas[i]);
             if (users[i] != address(instance)) {
                 assertEq(mockErc20.balanceOf(users[i]) - balanceBefore, claimableAmounts[i % claimableAmounts.length]);
             }
+            // Block double-claim attempt
+            vm.prank(users[i]);
+            vm.expectRevert(abi.encodeWithSelector(LeafUsed.selector));
+            instance.claim(proof, groups[i % groups.length], datas[i]);
         }
     }
 
@@ -252,13 +260,22 @@ contract TokenTableMerkleDistributorTest is Test {
             _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
             bytes32[] memory proof = merkleUtil.getProof(leaves, i);
             uint256 balanceBefore = mockErc20.balanceOf(users[i]);
-            vm.prank(delegate);
             vm.warp(claimableTimestamps[i]);
+            // Block invalid proofs
+            vm.prank(delegate);
+            vm.expectRevert(abi.encodeWithSelector(InvalidProof.selector));
+            instance.delegateClaim(address(0), proof, groups[i % groups.length], datas[i]);
+            // Delegate claim normally
+            vm.prank(delegate);
             instance.delegateClaim(users[i], proof, groups[i % groups.length], datas[i]);
             if (users[i] != address(instance)) {
                 // if the user is the instance, then the diff will be 0
                 assertEq(mockErc20.balanceOf(users[i]) - balanceBefore, claimableAmounts[i % claimableAmounts.length]);
             }
+            vm.prank(delegate);
+            // Block double-claim attempt
+            vm.expectRevert(abi.encodeWithSelector(LeafUsed.selector));
+            instance.delegateClaim(users[i], proof, groups[i % groups.length], datas[i]);
         }
     }
 
