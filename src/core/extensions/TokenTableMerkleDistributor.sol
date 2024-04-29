@@ -14,8 +14,6 @@ struct TokenTableMerkleDistributorData {
 contract TokenTableMerkleDistributor is BaseMerkleDistributor {
     using SafeERC20 for IERC20;
 
-    event Claimed(address recipient, address token, bytes32 group, uint256 amount);
-
     error OutsideClaimableTimeRange();
 
     function withdraw(bytes memory) external virtual override onlyOwner {
@@ -46,15 +44,10 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
                 || decodedData.claimableTimestamp < _getBaseMerkleDistributorStorage().startTime
         ) revert OutsideClaimableTimeRange();
         _send(recipient, _getBaseMerkleDistributorStorage().token, decodedData.claimableAmount);
-        emit Claimed(recipient, _getBaseMerkleDistributorStorage().token, group, decodedData.claimableAmount);
         return decodedData.claimableAmount;
     }
 
     function _send(address recipient, address token, uint256 amount) internal virtual override {
         IERC20(token).safeTransfer(recipient, amount);
-    }
-
-    function _balanceOfSelf() internal view virtual override returns (uint256 balance) {
-        return IERC20(_getBaseMerkleDistributorStorage().token).balanceOf(address(this));
     }
 }

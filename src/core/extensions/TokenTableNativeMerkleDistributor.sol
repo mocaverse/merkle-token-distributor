@@ -32,8 +32,4 @@ contract TokenTableNativeMerkleDistributor is TokenTableMerkleDistributor {
         // solhint-disable-next-line custom-errors
         require(success, string(data));
     }
-
-    function _balanceOfSelf() internal view virtual override returns (uint256 balance) {
-        return address(this).balance;
-    }
 }

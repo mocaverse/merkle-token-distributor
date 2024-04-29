@@ -37,7 +37,7 @@ abstract contract BaseMerkleDistributor is
 
     event Initialized(string projectId);
     event ClaimDelegateSet(address delegate);
-    event Claimed(address recipient, bytes data);
+    event Claimed(address recipient, bytes32 group, bytes data);
 
     error UnsupportedOperation();
     error TimeInactive();
@@ -91,7 +91,22 @@ abstract contract BaseMerkleDistributor is
     {
         uint256 claimedAmount = _verifyAndClaim(_msgSender(), proof, group, data);
         _afterClaim(_msgSender(), proof, group, data, claimedAmount);
-        emit Claimed(_msgSender(), data);
+        emit Claimed(_msgSender(), group, data);
+    }
+
+    function batchDelegateClaim(
+        address[] calldata recipients,
+        bytes32[][] calldata proofs,
+        bytes32[] calldata groups,
+        bytes[] calldata datas
+    )
+        external
+        payable
+        virtual
+    {
+        for (uint256 i = 0; i < recipients.length; i++) {
+            delegateClaim(recipients[i], proofs[i], groups[i], datas[i]);
+        }
     }
 
     function delegateClaim(
@@ -100,7 +115,7 @@ abstract contract BaseMerkleDistributor is
         bytes32 group,
         bytes calldata data
     )
-        external
+        public
         payable
         virtual
         onlyDelegate
@@ -108,11 +123,12 @@ abstract contract BaseMerkleDistributor is
         nonReentrant
     {
         uint256 claimedAmount = _verifyAndClaim(recipient, proof, group, data);
-        _afterDelegateClaim(recipient, proof, group, data, claimedAmount);
-        emit Claimed(recipient, data);
+        _afterDelegateClaim(_msgSender(), recipient, proof, group, data, claimedAmount);
+        emit Claimed(recipient, group, data);
     }
 
     // solhint-disable no-empty-blocks
+    // solhint-disable ordering
     function withdraw(bytes memory extraData) external virtual { }
 
     function getClaimDelegate() external view returns (address) {
@@ -183,18 +199,25 @@ abstract contract BaseMerkleDistributor is
 
     function _chargeFees(address recipient, uint256 claimedAmount) internal virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        if ($.feeCollector == address(0)) return;
-        uint256 amountToCharge = ITTUFeeCollector($.feeCollector).getFee(address(this), claimedAmount);
-        if (amountToCharge == 0) return;
-        if ($.feeToken == address(0)) {
+        address feeCollector = $.feeCollector;
+        if (feeCollector == address(0)) {
+            if (msg.value > 0) revert IncorrectFees();
+            return;
+        }
+        uint256 amountToCharge = ITTUFeeCollector(feeCollector).getFee(address(this), claimedAmount);
+        if (amountToCharge == 0) {
+            if (msg.value > 0) revert IncorrectFees();
+            return;
+        }
+        address feeToken = $.feeToken;
+        if (feeToken == address(0)) {
             if (msg.value != amountToCharge) revert IncorrectFees();
-            (bool success, bytes memory data) = $.feeCollector.call{ value: amountToCharge }("");
+            (bool success, bytes memory data) = feeCollector.call{ value: amountToCharge }("");
             // solhint-disable-next-line custom-errors
             require(success, string(data));
         } else {
             if (msg.value > 0) revert IncorrectFees();
-            IERC20($.feeToken).safeTransferFrom(recipient, address(this), amountToCharge);
-            IERC20($.feeToken).safeTransfer($.feeCollector, amountToCharge);
+            IERC20(feeToken).safeTransferFrom(recipient, feeCollector, amountToCharge);
         }
     }
 
@@ -212,7 +235,8 @@ abstract contract BaseMerkleDistributor is
     }
 
     function _afterDelegateClaim(
-        address recipient,
+        address delegate,
+        address, // recipient
         bytes32[] calldata, // proof
         bytes32, // group
         bytes calldata, // data
@@ -221,13 +245,11 @@ abstract contract BaseMerkleDistributor is
         internal
         virtual
     {
-        _chargeFees(recipient, claimedAmount);
+        _chargeFees(delegate, claimedAmount);
     }
 
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner { }
-
-    function _balanceOfSelf() internal view virtual returns (uint256 balance);
 
     function _getBaseMerkleDistributorStorage() internal pure returns (BaseMerkleDistributorStorage storage $) {
         assembly {
