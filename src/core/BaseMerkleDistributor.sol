@@ -185,12 +185,14 @@ abstract contract BaseMerkleDistributor is
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         if ($.feeCollector == address(0)) return;
         uint256 amountToCharge = ITTUFeeCollector($.feeCollector).getFee(address(this), claimedAmount);
+        if (amountToCharge == 0) return;
         if ($.feeToken == address(0)) {
             if (msg.value != amountToCharge) revert IncorrectFees();
             (bool success, bytes memory data) = $.feeCollector.call{ value: amountToCharge }("");
             // solhint-disable-next-line custom-errors
             require(success, string(data));
         } else {
+            if (msg.value > 0) revert IncorrectFees();
             IERC20($.feeToken).safeTransferFrom(recipient, address(this), amountToCharge);
             IERC20($.feeToken).safeTransfer($.feeCollector, amountToCharge);
         }
