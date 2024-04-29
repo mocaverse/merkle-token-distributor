@@ -10,6 +10,11 @@ import { ITTUFeeCollector } from "@ethsign/tokentable-evm-contracts/contracts/in
 import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+interface IMDCreate2 {
+    function feeTokens(address deployment) external view returns (address);
+    function feeCollectors(address deployment) external view returns (address);
+}
+
 abstract contract BaseMerkleDistributor is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -23,10 +28,9 @@ abstract contract BaseMerkleDistributor is
     struct BaseMerkleDistributorStorage {
         mapping(bytes32 leaf => bool used) usedLeafs;
         bytes32 root;
+        address deployer;
         address token;
         address claimDelegate;
-        address feeToken;
-        address feeCollector;
         uint256 startTime;
         uint256 endTime;
     }
@@ -70,6 +74,7 @@ abstract contract BaseMerkleDistributor is
     function initialize(string memory projectId, address owner_) public initializer {
         __Ownable_init(owner_);
         __ReentrancyGuard_init_unchained();
+        _getBaseMerkleDistributorStorage().deployer = _msgSender();
         emit Initialized(projectId);
     }
 
@@ -147,16 +152,12 @@ abstract contract BaseMerkleDistributor is
         return _getBaseMerkleDistributorStorage().token;
     }
 
-    function getFeeToken() external view returns (address) {
-        return _getBaseMerkleDistributorStorage().feeToken;
-    }
-
-    function getFeeCollector() external view returns (address) {
-        return _getBaseMerkleDistributorStorage().feeCollector;
+    function getDeployer() external view returns (address) {
+        return _getBaseMerkleDistributorStorage().deployer;
     }
 
     function version() external pure returns (string memory) {
-        return "0.2.0";
+        return "0.3.0";
     }
 
     function setBaseParams(address token, uint256 startTime, uint256 endTime, bytes32 root) public virtual onlyOwner {
@@ -165,11 +166,6 @@ abstract contract BaseMerkleDistributor is
         _getBaseMerkleDistributorStorage().startTime = startTime;
         _getBaseMerkleDistributorStorage().endTime = endTime;
         _getBaseMerkleDistributorStorage().root = root;
-    }
-
-    function setFeeParams(address feeToken, address feeCollector) public virtual onlyOwner {
-        _getBaseMerkleDistributorStorage().feeToken = feeToken;
-        _getBaseMerkleDistributorStorage().feeCollector = feeCollector;
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
@@ -199,7 +195,8 @@ abstract contract BaseMerkleDistributor is
 
     function _chargeFees(address recipient, uint256 claimedAmount) internal virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        address feeCollector = $.feeCollector;
+        IMDCreate2 deployer = IMDCreate2($.deployer);
+        address feeCollector = deployer.feeCollectors(address(this));
         if (feeCollector == address(0)) {
             if (msg.value > 0) revert IncorrectFees();
             return;
@@ -209,7 +206,7 @@ abstract contract BaseMerkleDistributor is
             if (msg.value > 0) revert IncorrectFees();
             return;
         }
-        address feeToken = $.feeToken;
+        address feeToken = deployer.feeTokens(address(this));
         if (feeToken == address(0)) {
             if (msg.value != amountToCharge) revert IncorrectFees();
             (bool success, bytes memory data) = feeCollector.call{ value: amountToCharge }("");

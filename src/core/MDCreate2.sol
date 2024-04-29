@@ -16,10 +16,17 @@ enum MDType {
 contract MDCreate2 is Ownable, IVersionable {
     mapping(string projectId => address deployment) public deployments;
     mapping(MDType mdType => address implementation) public implementations;
+    mapping(address deployment => address feeTokens) public feeTokens;
+    mapping(address deployment => address feeCollectors) public feeCollectors;
 
     error UnsupportedOperation();
 
     constructor() Ownable(_msgSender()) { }
+
+    function setDeploymentFeeParams(address deployment, address feeToken, address feeCollector) external onlyOwner {
+        feeTokens[deployment] = feeToken;
+        feeCollectors[deployment] = feeCollector;
+    }
 
     function setImplementation(MDType mdType, address implementation) external onlyOwner {
         implementations[mdType] = implementation;
@@ -38,6 +45,6 @@ contract MDCreate2 is Ownable, IVersionable {
     }
 
     function version() external pure override returns (string memory) {
-        return "0.1.2";
+        return "0.2.0";
     }
 }

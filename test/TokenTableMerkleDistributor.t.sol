@@ -3,6 +3,7 @@
 pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
+import { MDType, MDCreate2 } from "../src/core/MDCreate2.sol";
 import {
     TokenTableMerkleDistributor,
     TokenTableMerkleDistributorData
@@ -16,6 +17,7 @@ import { TTUFeeCollector } from "../src/libs/tokentable/core/TTUFeeCollector.sol
 contract TokenTableMerkleDistributorTest is Test {
     using SafeERC20 for IERC20;
 
+    MDCreate2 public deployer;
     TokenTableMerkleDistributor public instance;
     Merkle public merkleUtil;
     IERC20 public mockErc20;
@@ -35,8 +37,10 @@ contract TokenTableMerkleDistributorTest is Test {
     error OwnableUnauthorizedAccount(address account);
 
     function setUp() public {
-        instance = new TokenTableMerkleDistributor();
-        instance.initialize("", address(this));
+        deployer = new MDCreate2();
+        address impl = address(new TokenTableMerkleDistributor());
+        deployer.setImplementation(MDType.TokenTable, impl);
+        instance = TokenTableMerkleDistributor(deployer.deploy(MDType.TokenTable, ""));
         merkleUtil = new Merkle();
         mockErc20 = new MockERC20();
         ttuFeeCollector = new TTUFeeCollector();
@@ -80,19 +84,6 @@ contract TokenTableMerkleDistributorTest is Test {
         assertEq(contractStartTime, startTime);
         assertEq(contractEndTime, endTime);
         assertEq(instance.getRoot(), root);
-    }
-
-    function testFuzz_setFeeParams_fail_notOwner(address notOwner, address feeToken_, address feeCollector) public {
-        vm.assume(notOwner != address(this));
-        vm.prank(notOwner);
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, notOwner));
-        instance.setFeeParams(feeToken_, feeCollector);
-    }
-
-    function testFuzz_setFeeParams_succeed_0(address feeToken_, address feeCollector) public {
-        instance.setFeeParams(feeToken_, feeCollector);
-        assertEq(instance.getFeeToken(), feeToken_);
-        assertEq(instance.getFeeCollector(), feeCollector);
     }
 
     function testFuzz_setClaimDelegate_fail_notOwner(address notOwner, address delegate) public {
@@ -323,7 +314,7 @@ contract TokenTableMerkleDistributorTest is Test {
         instance.setBaseParams(
             address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
         );
-        instance.setFeeParams(address(0), address(ttuFeeCollector));
+        deployer.setDeploymentFeeParams(address(instance), address(0), address(ttuFeeCollector));
         ttuFeeCollector.setCustomFeeFixed(address(instance), fixedFee);
         for (uint256 i = 0; i < leaves.length; i++) {
             _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
@@ -366,7 +357,7 @@ contract TokenTableMerkleDistributorTest is Test {
         instance.setBaseParams(
             address(mockErc20), claimableTimestamps[0], claimableTimestamps[claimableTimestamps.length - 1] + 1, root
         );
-        instance.setFeeParams(address(feeToken), address(ttuFeeCollector));
+        deployer.setDeploymentFeeParams(address(instance), address(feeToken), address(ttuFeeCollector));
         ttuFeeCollector.setCustomFeeFixed(address(instance), fixedFee);
         for (uint256 i = 0; i < leaves.length; i++) {
             _mint(address(instance), claimableAmounts[i % claimableAmounts.length]);
