@@ -29,7 +29,7 @@ contract TokenTableMerkleDistributorTest is Test {
     error LeafUsed();
     error IncorrectFees();
 
-    error ClaimPremature();
+    error OutsideClaimableTimeRange();
 
     // Ownable
     error OwnableUnauthorizedAccount(address account);
@@ -221,7 +221,7 @@ contract TokenTableMerkleDistributorTest is Test {
                 // Block early claims
                 vm.warp(claimableTimestamps[i] - 1);
                 vm.prank(users[i]);
-                vm.expectRevert(abi.encodeWithSelector(ClaimPremature.selector));
+                vm.expectRevert(abi.encodeWithSelector(OutsideClaimableTimeRange.selector));
                 instance.claim(proof, groups[i % groups.length], datas[i]);
             }
             vm.warp(claimableTimestamps[i]);
