@@ -10,6 +10,11 @@ import { ITTUFeeCollector } from "@ethsign/tokentable-evm-contracts/contracts/in
 import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+interface IMDCreate2 {
+    function feeTokens(address deployment) external view returns (address);
+    function feeCollectors(address deployment) external view returns (address);
+}
+
 abstract contract BaseMerkleDistributor is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -23,10 +28,9 @@ abstract contract BaseMerkleDistributor is
     struct BaseMerkleDistributorStorage {
         mapping(bytes32 leaf => bool used) usedLeafs;
         bytes32 root;
+        address deployer;
         address token;
         address claimDelegate;
-        address feeToken;
-        address feeCollector;
         uint256 startTime;
         uint256 endTime;
     }
@@ -37,11 +41,13 @@ abstract contract BaseMerkleDistributor is
 
     event Initialized(string projectId);
     event ClaimDelegateSet(address delegate);
+    event Claimed(address recipient, bytes32 group, bytes data);
 
     error UnsupportedOperation();
     error TimeInactive();
     error InvalidProof();
     error LeafUsed();
+    error IncorrectFees();
 
     modifier onlyDelegate() {
         if (_msgSender() != _getBaseMerkleDistributorStorage().claimDelegate) {
@@ -68,6 +74,7 @@ abstract contract BaseMerkleDistributor is
     function initialize(string memory projectId, address owner_) public initializer {
         __Ownable_init(owner_);
         __ReentrancyGuard_init_unchained();
+        _getBaseMerkleDistributorStorage().deployer = _msgSender();
         emit Initialized(projectId);
     }
 
@@ -89,6 +96,22 @@ abstract contract BaseMerkleDistributor is
     {
         uint256 claimedAmount = _verifyAndClaim(_msgSender(), proof, group, data);
         _afterClaim(_msgSender(), proof, group, data, claimedAmount);
+        emit Claimed(_msgSender(), group, data);
+    }
+
+    function batchDelegateClaim(
+        address[] calldata recipients,
+        bytes32[][] calldata proofs,
+        bytes32[] calldata groups,
+        bytes[] calldata datas
+    )
+        external
+        payable
+        virtual
+    {
+        for (uint256 i = 0; i < recipients.length; i++) {
+            delegateClaim(recipients[i], proofs[i], groups[i], datas[i]);
+        }
     }
 
     function delegateClaim(
@@ -97,7 +120,7 @@ abstract contract BaseMerkleDistributor is
         bytes32 group,
         bytes calldata data
     )
-        external
+        public
         payable
         virtual
         onlyDelegate
@@ -105,20 +128,12 @@ abstract contract BaseMerkleDistributor is
         nonReentrant
     {
         uint256 claimedAmount = _verifyAndClaim(recipient, proof, group, data);
-        _afterDelegateClaim(recipient, proof, group, data, claimedAmount);
-    }
-
-    function nuke() external virtual onlyOwner {
-        BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        $.root = 0;
-        $.token = address(0);
-        $.claimDelegate = address(0);
-        $.startTime = 0;
-        $.endTime = 0;
-        renounceOwnership();
+        _afterDelegateClaim(_msgSender(), recipient, proof, group, data, claimedAmount);
+        emit Claimed(recipient, group, data);
     }
 
     // solhint-disable no-empty-blocks
+    // solhint-disable ordering
     function withdraw(bytes memory extraData) external virtual { }
 
     function getClaimDelegate() external view returns (address) {
@@ -137,28 +152,20 @@ abstract contract BaseMerkleDistributor is
         return _getBaseMerkleDistributorStorage().token;
     }
 
-    function getFeeToken() external view returns (address) {
-        return _getBaseMerkleDistributorStorage().feeToken;
-    }
-
-    function getFeeCollector() external view returns (address) {
-        return _getBaseMerkleDistributorStorage().feeCollector;
+    function getDeployer() external view returns (address) {
+        return _getBaseMerkleDistributorStorage().deployer;
     }
 
     function version() external pure returns (string memory) {
-        return "0.2.0";
+        return "0.3.0";
     }
 
-    function setBaseParams(address token, uint256 startTime, uint256 endTime) public virtual onlyOwner {
+    function setBaseParams(address token, uint256 startTime, uint256 endTime, bytes32 root) public virtual onlyOwner {
         if (startTime >= endTime) revert UnsupportedOperation();
         _getBaseMerkleDistributorStorage().token = token;
         _getBaseMerkleDistributorStorage().startTime = startTime;
         _getBaseMerkleDistributorStorage().endTime = endTime;
-    }
-
-    function setFeeParams(address feeToken, address feeCollector) public virtual onlyOwner {
-        _getBaseMerkleDistributorStorage().feeToken = feeToken;
-        _getBaseMerkleDistributorStorage().feeCollector = feeCollector;
+        _getBaseMerkleDistributorStorage().root = root;
     }
 
     function encodeLeaf(address user, bytes32 group, bytes memory data) public view virtual returns (bytes32) {
@@ -186,21 +193,33 @@ abstract contract BaseMerkleDistributor is
 
     function _send(address recipient, address token, uint256 amount) internal virtual;
 
-    function _chargeFees(uint256 claimedAmount) internal virtual {
+    function _chargeFees(address recipient, uint256 claimedAmount) internal virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
-        if ($.feeCollector == address(0)) return;
-        uint256 amountToCharge = ITTUFeeCollector($.feeCollector).getFee(address(this), claimedAmount);
-        if ($.feeToken == address(0)) {
-            (bool success, bytes memory data) = $.feeCollector.call{ value: amountToCharge }("");
+        IMDCreate2 deployer = IMDCreate2($.deployer);
+        address feeCollector = deployer.feeCollectors(address(this));
+        if (feeCollector == address(0)) {
+            if (msg.value > 0) revert IncorrectFees();
+            return;
+        }
+        uint256 amountToCharge = ITTUFeeCollector(feeCollector).getFee(address(this), claimedAmount);
+        if (amountToCharge == 0) {
+            if (msg.value > 0) revert IncorrectFees();
+            return;
+        }
+        address feeToken = deployer.feeTokens(address(this));
+        if (feeToken == address(0)) {
+            if (msg.value != amountToCharge) revert IncorrectFees();
+            (bool success, bytes memory data) = feeCollector.call{ value: amountToCharge }("");
             // solhint-disable-next-line custom-errors
             require(success, string(data));
         } else {
-            IERC20($.feeToken).safeTransfer($.feeCollector, amountToCharge);
+            if (msg.value > 0) revert IncorrectFees();
+            IERC20(feeToken).safeTransferFrom(recipient, feeCollector, amountToCharge);
         }
     }
 
     function _afterClaim(
-        address, // recipient
+        address recipient,
         bytes32[] calldata, // proof
         bytes32, // group
         bytes calldata, // data
@@ -209,10 +228,11 @@ abstract contract BaseMerkleDistributor is
         internal
         virtual
     {
-        _chargeFees(claimedAmount);
+        _chargeFees(recipient, claimedAmount);
     }
 
     function _afterDelegateClaim(
+        address delegate,
         address, // recipient
         bytes32[] calldata, // proof
         bytes32, // group
@@ -222,7 +242,7 @@ abstract contract BaseMerkleDistributor is
         internal
         virtual
     {
-        _chargeFees(claimedAmount);
+        _chargeFees(delegate, claimedAmount);
     }
 
     // solhint-disable-next-line no-empty-blocks
