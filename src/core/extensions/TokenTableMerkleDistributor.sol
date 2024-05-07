@@ -21,7 +21,7 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
         token.safeTransfer(owner(), token.balanceOf(address(this)));
     }
 
-    function decodeLeafData(bytes memory data) public pure returns (TokenTableMerkleDistributorData memory) {
+    function decodeLeafData(bytes memory data) public pure virtual returns (TokenTableMerkleDistributorData memory) {
         return abi.decode(data, (TokenTableMerkleDistributorData));
     }
 
@@ -32,6 +32,7 @@ contract TokenTableMerkleDistributor is BaseMerkleDistributor {
         bytes calldata data
     )
         internal
+        virtual
         override
         returns (uint256 claimedAmount)
     {

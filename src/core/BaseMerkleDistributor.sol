@@ -134,7 +134,7 @@ abstract contract BaseMerkleDistributor is
 
     // solhint-disable no-empty-blocks
     // solhint-disable ordering
-    function withdraw(bytes memory extraData) external virtual { }
+    function withdraw(bytes memory extraData) external virtual;
 
     function getClaimDelegate() external view returns (address) {
         return _getBaseMerkleDistributorStorage().claimDelegate;
@@ -193,7 +193,7 @@ abstract contract BaseMerkleDistributor is
 
     function _send(address recipient, address token, uint256 amount) internal virtual;
 
-    function _chargeFees(address recipient, uint256 claimedAmount) internal virtual {
+    function _chargeFees(address payer, uint256 claimedAmount) internal virtual {
         BaseMerkleDistributorStorage storage $ = _getBaseMerkleDistributorStorage();
         IMDCreate2 deployer = IMDCreate2($.deployer);
         address feeCollector = deployer.feeCollectors(address(this));
@@ -214,7 +214,7 @@ abstract contract BaseMerkleDistributor is
             require(success, string(data));
         } else {
             if (msg.value > 0) revert IncorrectFees();
-            IERC20(feeToken).safeTransferFrom(recipient, feeCollector, amountToCharge);
+            IERC20(feeToken).safeTransferFrom(payer, feeCollector, amountToCharge);
         }
     }
 
