@@ -2,13 +2,13 @@
 import {DeployFunction} from 'hardhat-deploy/dist/types'
 import {HardhatRuntimeEnvironment} from 'hardhat/types'
 
-const deployTokenTableMerkleDistributor: DeployFunction = async (
+const deploySimpleERC721MerkleDistributor: DeployFunction = async (
     hre: HardhatRuntimeEnvironment
 ) => {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const {deploy} = hre.deployments
     const {deployer} = await hre.getNamedAccounts()
-    await deploy('TokenTableMerkleDistributor', {
+    await deploy('SimpleERC721MerkleDistributor', {
         from: deployer,
         log: true,
         args: [],
@@ -16,5 +16,5 @@ const deployTokenTableMerkleDistributor: DeployFunction = async (
     })
 }
 
-export default deployTokenTableMerkleDistributor
-deployTokenTableMerkleDistributor.tags = ['TokenTableMerkleDistributor']
+export default deploySimpleERC721MerkleDistributor
+deploySimpleERC721MerkleDistributor.tags = ['SimpleERC721MerkleDistributor']

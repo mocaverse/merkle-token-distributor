@@ -76,8 +76,8 @@ importers:
         specifier: ^3.2.5
         version: 3.2.5
       solhint:
-        specifier: ^4.1.1
-        version: 4.1.1(typescript@5.0.4)
+        specifier: ^4.5.4
+        version: 4.5.4(typescript@5.0.4)
       solidity-docgen:
         specifier: 0.6.0-beta.36
         version: 0.6.0-beta.36(hardhat@2.20.1(ts-node@10.9.2(@types/node@18.15.13)(typescript@5.0.4))(typescript@5.0.4))
@@ -599,9 +599,6 @@ packages:
 
   '@solidity-parser/parser@0.14.5':
     resolution: {integrity: sha512-6dKnHZn7fg/iQATVEzqyUOyEidbn05q7YA2mQ9hC0MMXhhV3/JrsxmFSYZAcr7j1yUP700LLhTruvJ3MiQmjJg==}
-
-  '@solidity-parser/parser@0.16.2':
-    resolution: {integrity: sha512-PI9NfoA3P8XK2VBkK5oIfRgKDsicwDZfkVq9ZTBCQYGOP1N2owgY2dyLGyU5/J/hQs8KRk55kdmvTLjy3Mu3vg==}
 
   '@solidity-parser/parser@0.18.0':
     resolution: {integrity: sha512-yfORGUIPgLck41qyN7nbwJRAx17/jAIXCTanHOJZhB6PJ1iAk/84b/xlsVKFSyNyLXIj0dhppoE0+CRws7wlzA==}
@@ -2694,8 +2691,8 @@ packages:
     engines: {node: '>=8.0.0'}
     hasBin: true
 
-  solhint@4.1.1:
-    resolution: {integrity: sha512-7G4iF8H5hKHc0tR+/uyZesSKtfppFIMvPSW+Ku6MSL25oVRuyFeqNhOsXHfkex64wYJyXs4fe+pvhB069I19Tw==}
+  solhint@4.5.4:
+    resolution: {integrity: sha512-Cu1XiJXub2q1eCr9kkJ9VPv1sGcmj3V7Zb76B0CoezDOB9bu3DxKIFFH7ggCl9fWpEPD6xBmRLfZrYijkVmujQ==}
     hasBin: true
 
   solidity-ast@0.4.55:
@@ -3958,10 +3955,6 @@ snapshots:
       tslib: 2.6.2
 
   '@solidity-parser/parser@0.14.5':
-    dependencies:
-      antlr4ts: 0.5.0-alpha.4
-
-  '@solidity-parser/parser@0.16.2':
     dependencies:
       antlr4ts: 0.5.0-alpha.4
 
@@ -6383,9 +6376,9 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  solhint@4.1.1(typescript@5.0.4):
+  solhint@4.5.4(typescript@5.0.4):
     dependencies:
-      '@solidity-parser/parser': 0.16.2
+      '@solidity-parser/parser': 0.18.0
       ajv: 6.12.6
       antlr4: 4.13.1
       ast-parents: 0.0.1

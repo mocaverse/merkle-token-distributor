@@ -48,7 +48,7 @@
     "husky": "9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
-    "solhint": "^4.1.1",
+    "solhint": "^4.5.4",
     "solidity-docgen": "0.6.0-beta.36",
     "ts-node": "^10.9.2",
     "typescript": "~5.0.4"
