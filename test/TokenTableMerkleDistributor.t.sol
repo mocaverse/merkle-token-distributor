@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
-import { MDType, MDCreate2 } from "../src/core/MDCreate2.sol";
+import { MDCreate2 } from "../src/core/MDCreate2.sol";
 import {
     TokenTableMerkleDistributor,
     TokenTableMerkleDistributorData
@@ -39,8 +39,8 @@ contract TokenTableMerkleDistributorTest is Test {
     function setUp() public {
         deployer = new MDCreate2();
         address impl = address(new TokenTableMerkleDistributor());
-        deployer.setImplementation(MDType.TokenTable, impl);
-        instance = TokenTableMerkleDistributor(deployer.deploy(MDType.TokenTable, ""));
+        deployer.setImplementation(0, impl);
+        instance = TokenTableMerkleDistributor(deployer.deploy(0, ""));
         merkleUtil = new Merkle();
         mockErc20 = new MockERC20();
         ttuFeeCollector = new TTUFeeCollector();
