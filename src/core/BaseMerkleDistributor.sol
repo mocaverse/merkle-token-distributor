@@ -78,7 +78,7 @@ abstract contract BaseMerkleDistributor is
         emit Initialized(projectId);
     }
 
-    function setClaimDelegate(address delegate) external onlyOwner {
+    function setClaimDelegate(address delegate) external virtual onlyOwner {
         _getBaseMerkleDistributorStorage().claimDelegate = delegate;
         emit ClaimDelegateSet(delegate);
     }

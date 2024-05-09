@@ -28,8 +28,30 @@ contract MOCAMerkleDistributor is TokenTableMerkleDistributor, DelegateXYZProvid
         $.nft = nft;
     }
 
+    function setClaimDelegate(address) external virtual override {
+        revert UnsupportedOperation();
+    }
+
+    function batchDelegateClaim(
+        address[] calldata,
+        bytes32[][] calldata,
+        bytes32[] calldata,
+        bytes[] calldata
+    )
+        external
+        payable
+        virtual
+        override
+    {
+        revert UnsupportedOperation();
+    }
+
     function getNFT() external view returns (address) {
         return _getMOCAMerkleDistributorStorage().nft;
+    }
+
+    function delegateClaim(address, bytes32[] calldata, bytes32, bytes calldata) public payable virtual override {
+        revert UnsupportedOperation();
     }
 
     function decodeMOCALeafData(bytes memory data) public pure returns (MOCAMerkleDistributorData memory) {
@@ -61,7 +83,7 @@ contract MOCAMerkleDistributor is TokenTableMerkleDistributor, DelegateXYZProvid
         address nftOwner = IERC721(_getMOCAMerkleDistributorStorage().nft).ownerOf(decodedData.nftTokenId);
         if (
             nftOwner != _msgSender()
-                && externalDelegateRegistry.checkDelegateForContract(
+                && !externalDelegateRegistry.checkDelegateForContract(
                     _msgSender(), nftOwner, address(this), this.claim.selector
                 )
         ) {
