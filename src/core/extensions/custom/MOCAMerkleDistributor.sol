@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 import { TokenTableMerkleDistributor, TokenTableMerkleDistributorData } from "../TokenTableMerkleDistributor.sol";
 import { DelegateXYZProvider } from "../../../utils/DelegateXYZProvider.sol";
 import { IERC721 } from "@openzeppelin/contracts/interfaces/IERC721.sol";
-import { IDelegateRegistry } from "../../../libs/delegatexyz/IDelegateRegistry.sol";
 
 struct MOCAMerkleDistributorData {
     TokenTableMerkleDistributorData base;
