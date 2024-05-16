@@ -61,6 +61,9 @@ contract MOCAMerkleDistributor is TokenTableMerkleDistributor, DelegateXYZProvid
         revert UnsupportedOperation();
     }
 
+    // solhint-disable-next-line no-empty-blocks
+    function _chargeFees(address, uint256) internal virtual override { }
+
     function _verifyAndClaim(
         address,
         bytes32[] calldata proof,
