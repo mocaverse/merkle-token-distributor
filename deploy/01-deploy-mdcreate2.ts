@@ -43,6 +43,15 @@ const deployMDCreate2: DeployFunction = async (
             waitConfirmations: 1
         }
     )
+    const nftGatedMerkleDistributorResult = await deploy(
+        'NFTGatedMerkleDistributor',
+        {
+            from: deployer,
+            log: true,
+            args: [],
+            waitConfirmations: 1
+        }
+    )
 
     const MDCreate2Factory = await ethers.getContractFactory('MDCreate2')
     const mdCreate2Instance = MDCreate2Factory.attach(
@@ -59,6 +68,10 @@ const deployMDCreate2: DeployFunction = async (
     await mdCreate2Instance.setImplementation(
         2,
         simpleERC721MerkleDistributorResult.address
+    )
+    await mdCreate2Instance.setImplementation(
+        3,
+        nftGatedMerkleDistributorResult.address
     )
 }
 
