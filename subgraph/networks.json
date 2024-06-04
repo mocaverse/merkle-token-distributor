@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "BaseMerkleDistributor": {
+      "address": "0x36d6673f67a859449c53cb0d21c9eadd2d9978b5",
+      "startBlock": 0
+    }
+  }
+}

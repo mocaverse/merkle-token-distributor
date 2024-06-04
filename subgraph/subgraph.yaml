@@ -1,0 +1,33 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: NFTGatedMerkleDistributor
+    network: sepolia
+    source:
+      address: "0xD7fe275F764517C555d430CbEa6D6a52FEaF307b"
+      abi: NFTGatedMerkleDistributor
+      startBlock: 6012286
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ClaimDelegateSet
+        - Claimed
+        - Initialized
+        - Initialized1
+        - OwnershipTransferred
+        - Upgraded
+      abis:
+        - name: NFTGatedMerkleDistributor
+          file: ../out/NFTGatedMerkleDistributor.sol/NFTGatedMerkleDistributor.json
+      eventHandlers:
+        - event: Claimed(address,bytes32,bytes)
+          handler: handleClaimed
+        - event: Initialized(string)
+          handler: handleInitialized1
+      file: ./src/nft-gated-merkle-distributor.ts

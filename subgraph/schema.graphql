@@ -1,0 +1,21 @@
+type Claimed @entity(immutable: true) {
+  id: Bytes!
+  recipient: Bytes! # address
+  group: Bytes! # bytes32
+  index: BigInt
+  claimableTimestamp: BigInt
+  claimableAmount: BigInt
+  expiryTimestamp: BigInt
+  nftTokenId: BigInt
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Initialized1 @entity(immutable: true) {
+  id: Bytes!
+  projectId: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
