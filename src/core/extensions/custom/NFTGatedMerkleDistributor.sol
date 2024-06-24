@@ -5,6 +5,8 @@ import { TokenTableMerkleDistributor, TokenTableMerkleDistributorData } from "..
 import { DelegateXYZProvider } from "../../../utils/DelegateXYZProvider.sol";
 import { IERC721 } from "@openzeppelin/contracts/interfaces/IERC721.sol";
 
+import { console } from "forge-std/Test.sol";
+
 struct NFTGatedMerkleDistributorData {
     TokenTableMerkleDistributorData base;
     uint256 expiryTimestamp; // The airdrop can't be claimed past this timestamp. 0 == no expiry.

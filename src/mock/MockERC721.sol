@@ -17,4 +17,9 @@ contract MockERC721 is ERC721Enumerable, IERC721SafeMintable {
     function safeMint(address to, uint256 tokenId) external override {
         _safeMint(to, tokenId);
     }
+
+    function mint(address to) external returns (uint256 tokenId) {
+        tokenId = totalSupply();
+        _mint(to, totalSupply());
+    }
 }
