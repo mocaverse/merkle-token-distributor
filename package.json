@@ -19,6 +19,7 @@
     "test:gas": "forge test --gas-report",
     "deploy": "npx hardhat run scripts/02-deploy-simpleerc721merkledistributor.ts --network",
     "deploy:nft": "npx hardhat run scripts/03-deploy-dragonyearnft.ts --network ",
+    "merkle:validate": "npx hardhat run scripts/validate_merkle.ts --network ",
     "verify": "npx hardhat verify --network"
   },
   "author": "",
