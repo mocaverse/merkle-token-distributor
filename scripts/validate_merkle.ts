@@ -1,10 +1,8 @@
-const hre = require('hardhat')
-const fs = require('fs')
-const csv = require('csv-parse')
-
-const ethereumMulticall = require('ethereum-multicall')
-
-const REQUIRE_PARSE = true
+/* eslint-disable no-console */
+import hre from 'hardhat'
+import fs from 'fs'
+import csv from 'csv-parse'
+import {AbiCoder} from 'ethers'
 
 const PROJECT_ID = 'AD_2fSv9K1GHoUG'
 
@@ -69,36 +67,27 @@ interface ClaimData {
 
 async function run(batchSize = 50, startAt = 0, endAt = 0) {
     // const deployerPrivateKey = process.env.PRIVATE_KEY
-    const distributorAddress = process.env.DISTRIBUTOR_CONTRACT
-    const tokenAddress = process.env.TOKEN_CONTRACT
-
-    // const signer = new hre.ethers.Wallet(
-    //     deployerPrivateKey,
-    //     hre.ethers.provider
-    // )
+    const distributorAddress = process.env.DISTRIBUTOR_CONTRACT || ''
+    const tokenAddress = process.env.TOKEN_CONTRACT || ''
 
     const distributor = await hre.ethers.getContractAt(
         'NFTGatedMerkleDistributor',
         distributorAddress
         // signer
     )
-    const token = await hre.ethers.getContractAt('IERC20', tokenAddress)
 
-    const isPaused = await distributor.paused()
+    const [startTime, endTime] = await distributor.getTime()
 
-    if (isPaused) {
-        console.error('Contract is paused, unable to stake')
-        return
-    }
+    // eslint-disable-next-line no-console
+    console.log('Contract start time: ', startTime, ' end time: ', endTime)
 
     // load csv from file path
-    // const csvPath = process.env.CSV_PATH
-    const csvPath = '../moca_0625_e2e.csv'
+    const csvPath = process.env.CSV_PATH || ''
     const userRecords = await loadCSV(csvPath)
     const executeTime = Date.now()
 
     console.log(
-        'Script started for claim contract: ',
+        'Script started for validting merkle contract: ',
         distributorAddress,
         ' at ',
         executeTime
@@ -110,9 +99,7 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
     const allNFTTokenIds = userRecords.map((record) => record.Recipient)
     const allAmounts = userRecords
         .map((record) => record['Token Allocated'])
-        .map((amount) =>
-            REQUIRE_PARSE ? hre.ethers.parseEther(amount) : amount
-        )
+        .map((amount) => hre.ethers.parseEther(amount))
 
     for (let i = startAt; i < end; i += batchSize) {
         const tokenIds = allNFTTokenIds.slice(i, i + batchSize)
@@ -126,6 +113,11 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
         const claims = await requestProofs(tokenIds, PROJECT_ID)
 
         for (let j = 0; j < claims.length; j++) {
+            /*
+             * const coder = new AbiCoder()
+             * coder.decode([], claims[j].data)
+             */
+
             const leafData = await distributor.decodeMOCALeafData(
                 claims[j].data
             )
@@ -136,14 +128,20 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
 
             const expectedAmount = amounts[idx]
 
-            if (
-                leafData.base.claimableAmount !==
-                hre.ethers.formatEther(expectedAmount)
-            ) {
+            console.log(leafData.base.claimableAmount, expectedAmount)
+
+            let writeContent = `${claims[j].recipient} data matched`
+            if (leafData.base.claimableAmount !== expectedAmount) {
                 console.error(
-                    `Amount mismatch: ${leafData.base.claimableAmount} != ${expectedAmount}`
+                    `${claims[j].recipient} Amount mismatch: ${leafData.base.claimableAmount} != ${expectedAmount}`
                 )
+                writeContent = `${claims[j].recipient} data mismatch: ${leafData.base.claimableAmount} != ${expectedAmount}`
             }
+
+            fs.appendFileSync(
+                `validate_merkle_${PROJECT_ID}_${executeTime}.log`,
+                writeContent + '\n'
+            )
         }
     }
 
