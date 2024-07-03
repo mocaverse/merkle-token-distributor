@@ -197,7 +197,7 @@ const config: HardhatUserConfig = {
             scroll: process.env.SCROLL_API_KEY!,
             x1: process.env.X1_API_KEY!,
             base: process.env.BASE_API_KEY!,
-            baseSepolia: process.env.BASE_SEPOLIA_API_KEY!,
+            baseSepolia: process.env.BASE_SEPOLIA_API_KEY,
             plumeTestnet: process.env.PLUME_TESTNET_API_KEY!,
             berachainTestnet: process.env.BERACHAIN_TESTNET_API_KEY!,
             opSepolia: process.env.OP_ETHERSCAN_API_KEY!,
