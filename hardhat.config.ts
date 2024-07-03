@@ -86,7 +86,8 @@ const config: HardhatUserConfig = {
             url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API!}`,
             accounts: [process.env.PRIVATE_KEY!],
             saveDeployments: true,
-            zksync: false
+            zksync: false,
+            gasPrice: 10000000000 // 10 gwei
         },
         scrollSepolia: {
             chainId: 534351,
