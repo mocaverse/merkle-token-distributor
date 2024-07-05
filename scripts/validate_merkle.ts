@@ -139,6 +139,11 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
             }
 
             fs.appendFileSync(
+                `output/${PROJECT_ID}_${claims[j].recipient}.json`,
+                JSON.stringify(claims[j])
+            )
+
+            fs.appendFileSync(
                 `validate_merkle_${PROJECT_ID}_${executeTime}.log`,
                 writeContent + '\n'
             )
