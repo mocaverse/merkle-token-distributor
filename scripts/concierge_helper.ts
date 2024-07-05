@@ -58,7 +58,7 @@ export async function loadCSV(filePath: string): Promise<string[]> {
                     ltrim: true
                 })
             )
-            .on('data', (data) => addresses.push(data.address))
+            .on('data', (data) => addresses.push(data.address.toLowerCase()))
             .on('end', () => {
                 resolve(addresses)
             })

@@ -78,7 +78,7 @@ async function run() {
     console.log(csvUsers)
 
     const userAddresses =
-        delegatingAddresses?.filter((add) => csvUsers.includes(add)) || []
+        delegatingAddresses?.filter((add) => csvUsers.includes(add.toLowerCase())) || []
 
     console.log('processing addresses', userAddresses)
 
@@ -92,7 +92,7 @@ async function run() {
 
     console.log('Contract start time: ', startTime, ' end time: ', endTime)
 
-    for (let i = 0; i < userAddresses?.length; i += 1) {
+    for (let i = 0; i < userAddresses.length; i += 1) {
         const ownedNfts = await requestOwnerNfts(
             (await signer.provider?.getNetwork())?.chainId.toString() || '1',
             userAddresses[i],
