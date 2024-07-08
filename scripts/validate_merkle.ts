@@ -2,9 +2,10 @@
 import hre from 'hardhat'
 import fs from 'fs'
 import csv from 'csv-parse'
-import {AbiCoder} from 'ethers'
 
-const PROJECT_ID = 'AD_2fSv9K1GHoUG'
+const PROJECT_ID = process.env.PROJECT_ID || ''
+const TOKEN_TABLE_DOMAIN =
+    process.env.TOKEN_TABLE_DOMAIN || 'https://moca-claim.tokentable.xyz'
 
 async function loadCSV(
     filePath: string
@@ -47,7 +48,7 @@ async function requestProofs(
     }
 
     return fetch(
-        'https://moca-claim.tokentable.xyz/api/airdrop-open/batch-query',
+        `${TOKEN_TABLE_DOMAIN}/api/airdrop-open/batch-query`,
         requestOptions
     )
         .then((response) => response.json())
@@ -66,9 +67,7 @@ interface ClaimData {
 }
 
 async function run(batchSize = 50, startAt = 0, endAt = 0) {
-    // const deployerPrivateKey = process.env.PRIVATE_KEY
     const distributorAddress = process.env.DISTRIBUTOR_CONTRACT || ''
-    const tokenAddress = process.env.TOKEN_CONTRACT || ''
 
     const distributor = await hre.ethers.getContractAt(
         'NFTGatedMerkleDistributor',
@@ -100,6 +99,11 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
     const allAmounts = userRecords
         .map((record) => record['Token Allocated'])
         .map((amount) => hre.ethers.parseEther(amount))
+
+    fs.appendFileSync(
+        `output/${PROJECT_ID}_proofs.csv`,
+        '"nft id","claim","proof (bytes32[])","group (byte32)","data (bytes)"\n'
+    )
 
     for (let i = startAt; i < end; i += batchSize) {
         const tokenIds = allNFTTokenIds.slice(i, i + batchSize)
@@ -137,11 +141,10 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
                 )
                 writeContent = `${claims[j].recipient} data mismatch: ${leafData.base.claimableAmount} != ${expectedAmount}`
             }
+            const proofString = claims[j].proof.join(',')
+            const csvOutput = `${claims[j].recipient},${0},"${proofString}",${claims[j].group},${claims[j].data}\n`
 
-            fs.appendFileSync(
-                `output/${PROJECT_ID}_${claims[j].recipient}.json`,
-                JSON.stringify(claims[j])
-            )
+            fs.appendFileSync(`output/${PROJECT_ID}_proofs.csv`, csvOutput)
 
             fs.appendFileSync(
                 `validate_merkle_${PROJECT_ID}_${executeTime}.log`,

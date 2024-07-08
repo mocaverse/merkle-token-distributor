@@ -31,14 +31,17 @@ const ISLEAFUSED_ABI = {
     type: 'function'
 }
 
+// const RPC_URL = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API!}`
+const RPC_URL =
+    'https://eth-sepolia.g.alchemy.com/v2/oi_0UC8MxXX5JWBts1L8f8waeNdenVf5'
+
+const TOKEN_TABLE_DOMAIN =
+    process.env.TOKEN_TABLE_DOMAIN || 'https://moca-claim.tokentable.xyz'
+
 export const getDelegateAddresses = async (recipient: `0x${string}`) => {
     let incoming
     try {
-        const v2 = new DelegateV2(
-            http(
-                `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API!}`
-            )
-        )
+        const v2 = new DelegateV2(http(RPC_URL))
         incoming = await v2.getIncomingDelegations(recipient)
         return incoming.map((it) => it.from)
     } catch (error) {
@@ -85,7 +88,7 @@ export async function requestProofs(
     }
 
     return fetch(
-        'https://moca-claim.tokentable.xyz/api/airdrop-open/batch-query',
+        `${TOKEN_TABLE_DOMAIN}/api/airdrop-open/batch-query`,
         requestOptions
     )
         .then((response) => response.json())
@@ -100,8 +103,7 @@ export async function batchFetchClaimed(
     const multicall = new Multicall({
         multicallCustomContractAddress:
             '0xcA11bde05977b3631167028862bE2a173976CA11',
-        nodeUrl:
-            'https://mainnet.infura.io/v3/fc2c3ee84563426590136edf651ad478',
+        nodeUrl: RPC_URL,
         tryAggregate: true
     })
 
@@ -130,6 +132,12 @@ export async function batchFetchClaimed(
     return isLeavesUsed
 }
 
+export function wait(ms: number) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
+
 export async function requestOwnerNfts(
     chainId: string,
     owner: string,
@@ -150,10 +158,7 @@ export async function requestOwnerNfts(
         body: raw
     }
 
-    return fetch(
-        'https://moca-claim.tokentable.xyz/api/airdrop-open/nfts',
-        requestOptions
-    )
+    return fetch(`${TOKEN_TABLE_DOMAIN}/api/airdrop-open/nfts`, requestOptions)
         .then((response) => response.json())
         .then((res) => res.data.ownedNfts)
 }
@@ -169,22 +174,6 @@ interface ClaimData {
     expiryTimetamp: number
     index: number
     expiryTimestamp: number
-}
-
-export interface IAirdropClaim {
-    claimable?: boolean
-    recipient: string
-    index: number
-    proof: string[]
-    amount: string
-    unlockingAt: number
-    group: string
-    data: string
-    leaf: string
-    claimed?: boolean
-    expiryTimestamp: number
-    expired?: boolean
-    nft?: OwnedNft
 }
 
 export function chunk<T>(array: T[], chunkSize: number): T[][] {

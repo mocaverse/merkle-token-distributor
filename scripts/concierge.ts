@@ -2,13 +2,14 @@
 import hre from 'hardhat'
 import fs from 'fs'
 
-import {OwnedNft, OwnedNftsResponse} from 'alchemy-sdk'
+import {OwnedNft} from 'alchemy-sdk'
 import {
     batchFetchClaimed,
     getDelegateAddresses,
     loadCSV,
     requestOwnerNfts,
-    requestProofs
+    requestProofs,
+    wait
 } from './concierge_helper'
 
 const PROJECT_ID = process.env.PROJECT_ID || ''
@@ -26,21 +27,7 @@ interface ClaimData {
     expiryTimestamp: number
 }
 
-export interface IAirdropClaim {
-    claimable?: boolean
-    recipient: string
-    index: number
-    proof: string[]
-    amount: string
-    unlockingAt: number
-    group: string
-    data: string
-    leaf: string
-    claimed?: boolean
-    expiryTimestamp: number
-    expired?: boolean
-    nft?: OwnedNft
-}
+const MAX_GAS = hre.ethers.parseUnits('5', 'gwei')
 
 function chunk<T>(array: T[], chunkSize: number): T[][] {
     const chunkedArray: T[][] = []
@@ -78,7 +65,9 @@ async function run() {
     console.log(csvUsers)
 
     const userAddresses =
-        delegatingAddresses?.filter((add) => csvUsers.includes(add.toLowerCase())) || []
+        delegatingAddresses?.filter((add) =>
+            csvUsers.includes(add.toLowerCase())
+        ) || []
 
     console.log('processing addresses', userAddresses)
 
@@ -96,7 +85,8 @@ async function run() {
         const ownedNfts = await requestOwnerNfts(
             (await signer.provider?.getNetwork())?.chainId.toString() || '1',
             userAddresses[i],
-            '0x59325733eb952a92e069c87f0a6168b29e80627f' // MOCA NFT address
+            process.env.MOCA_NFT_ADDRESS ||
+                '0x59325733eb952a92e069c87f0a6168b29e80627f' // MOCA NFT address
         )
 
         const tokenIDs: number[] = ownedNfts?.map((it) =>
@@ -133,25 +123,40 @@ async function run() {
         // console.log('user ', userAddresses[i], 'claims', claims)
 
         for (let j = 0; j < claims.length; j++) {
-            /*
-             * const coder = new AbiCoder()
-             * coder.decode([], claims[j].data)
-             */
+            let estPrice = 0n
 
-            const txn = await distributor
-                .connect(signer)
-                .claim(claims[j].proof, claims[j].group, claims[j].data)
+            do {
+                estPrice = (await signer.provider!.getFeeData()).gasPrice || 0n
 
-            await txn.wait()
+                console.log('txn estimation', estPrice, MAX_GAS)
+                if (estPrice > MAX_GAS) {
+                    console.log('waiting for gas price to drop')
+                    await wait(15000)
+                }
+            } while (estPrice > MAX_GAS)
 
-            console.log(`claimed for nft ${claims[j].recipient} ${txn.hash}`)
+            try {
+                const txn = await distributor
+                    .connect(signer)
+                    .claim(claims[j].proof, claims[j].group, claims[j].data, {
+                        maxFeePerGas: MAX_GAS
+                    })
 
-            const writeContent = `${claims[j].recipient} claimed, txn: ${txn.hash}`
+                // await txn.wait()
 
-            fs.appendFileSync(
-                `concierge_${PROJECT_ID}_${executeTime}.log`,
-                writeContent + '\n'
-            )
+                console.log(
+                    `claimed for nft ${claims[j].recipient} ${txn.hash}`
+                )
+
+                const writeContent = `${claims[j].recipient} claimed, txn: ${txn.hash}`
+
+                fs.appendFileSync(
+                    `concierge_${PROJECT_ID}_${executeTime}.log`,
+                    writeContent + '\n'
+                )
+            } catch (error) {
+                console.warn('claiming error', error)
+            }
         }
     }
 
