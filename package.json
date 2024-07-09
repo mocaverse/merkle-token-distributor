@@ -20,15 +20,21 @@
     "deploy": "npx hardhat run scripts/02-deploy-simpleerc721merkledistributor.ts --network",
     "deploy:nft": "npx hardhat run scripts/03-deploy-dragonyearnft.ts --network ",
     "merkle:validate": "npx hardhat run scripts/validate_merkle.ts --network ",
+    "concierge": "npx hardhat run scripts/concierge.ts --network ",
     "verify": "npx hardhat verify --network"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@delegatexyz/sdk": "^0.5.2",
     "@ethsign/tokentable-evm-contracts": "2.5.7",
     "@openzeppelin/contracts": "5.0.1",
     "@openzeppelin/contracts-upgradeable": "5.0.1",
-    "csv-parse": "^5.5.6"
+    "alchemy-sdk": "^3.3.1",
+    "csv-parse": "^5.5.6",
+    "ethereum-multicall": "^2.24.0",
+    "viem": "^2.17.0",
+    "wagmi": "^2.10.9"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.73.0",
