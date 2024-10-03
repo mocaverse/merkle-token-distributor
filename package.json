@@ -22,6 +22,7 @@
     "merkle:validate": "npx hardhat run scripts/validate_merkle.ts --network ",
     "generate_leaf": "npx hardhat run scripts/generate_leaf.ts --network ",
     "concierge": "npx hardhat run scripts/concierge.ts --network ",
+    "validate_merkle_p2": "npx hardhat run scripts/validate_merkle_p2.ts --network ",
     "verify": "npx hardhat verify --network"
   },
   "author": "",
