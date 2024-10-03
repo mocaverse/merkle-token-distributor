@@ -31,9 +31,8 @@ const ISLEAFUSED_ABI = {
     type: 'function'
 }
 
-// const RPC_URL = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API!}`
-const RPC_URL =
-    'https://eth-sepolia.g.alchemy.com/v2/oi_0UC8MxXX5JWBts1L8f8waeNdenVf5'
+const RPC_URL = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API!}`
+// const RPC_URL = 'https://eth-sepolia.g.alchemy.com/v2/oi_0UC8MxXX5JWBts1L8f8waeNdenVf5'
 
 const TOKEN_TABLE_DOMAIN =
     process.env.TOKEN_TABLE_DOMAIN || 'https://moca-claim.tokentable.xyz'

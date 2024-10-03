@@ -2,7 +2,6 @@
 import hre from 'hardhat'
 import fs from 'fs'
 
-import {OwnedNft} from 'alchemy-sdk'
 import {
     batchFetchClaimed,
     getDelegateAddresses,
@@ -27,7 +26,7 @@ interface ClaimData {
     expiryTimestamp: number
 }
 
-const MAX_GAS = hre.ethers.parseUnits('5', 'gwei')
+const MAX_GAS = hre.ethers.parseUnits('7', 'gwei')
 
 function chunk<T>(array: T[], chunkSize: number): T[][] {
     const chunkedArray: T[][] = []
@@ -69,6 +68,7 @@ async function run() {
             csvUsers.includes(add.toLowerCase())
         ) || []
 
+    console.log('delegating addresses', delegatingAddresses)
     console.log('processing addresses', userAddresses)
 
     const distributor = await hre.ethers.getContractAt(

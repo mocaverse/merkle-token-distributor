@@ -3,7 +3,7 @@ import hre from 'hardhat'
 import fs from 'fs'
 import csv from 'csv-parse'
 
-const PROJECT_ID = process.env.PROJECT_ID || 'AD_S91weJPDfAwv'
+const PROJECT_ID = 'AD_KJWN2E8HWUt0' //neko
 const TOKEN_TABLE_DOMAIN =
     process.env.TOKEN_TABLE_DOMAIN || 'https://moca-claim.tokentable.xyz'
 
@@ -73,7 +73,7 @@ interface ClaimData {
 }
 
 async function run(batchSize = 50, startAt = 0, endAt = 0) {
-    const distributorAddress = process.env.DISTRIBUTOR_CONTRACT || ''
+    const distributorAddress = '0x96a95810C7D28245f64D6E065584500328897531' //neko
 
     const distributor = await hre.ethers.getContractAt(
         'NFTGatedMerkleDistributor',
@@ -102,18 +102,12 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
 
     // do convertion all at once in begining
     const allNFTTokenIds = userRecords.map((record) => record.Recipient)
-    const allAmounts = userRecords
-        .map((record) => record['Token Allocated'])
-        .map((amount) => hre.ethers.parseEther(amount))
 
-    fs.appendFileSync(
-        `output/${PROJECT_ID}_proofs.csv`,
-        '"nft id","claim","proof (bytes32[])","group (byte32)","data (bytes)"\n'
-    )
+    const filePath = `output/leafs_${Date.now()}.csv`
+    fs.appendFileSync(filePath, '"nft id","leaf","isClaimed"\n')
 
     for (let i = startAt; i < end; i += batchSize) {
         const tokenIds = allNFTTokenIds.slice(i, i + batchSize)
-        const amounts = allAmounts.slice(i, i + batchSize)
 
         console.log(
             `Validating from ${i} to ${i + batchSize} of ${userRecords.length}`
@@ -122,46 +116,24 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
         // batch request claims
         const claims = await requestProofs(tokenIds, PROJECT_ID)
 
-        console.log('claims response', claims)
-
         for (let j = 0; j < claims.length; j++) {
             /*
              * const coder = new AbiCoder()
              * coder.decode([], claims[j].data)
              */
 
-            const leafData = await distributor.decodeMOCALeafData(
-                claims[j].data
-            )
+            const leaf = '0x' + claims[j].leaf
+            const isClaimed = await distributor.isLeafUsed(leaf)
 
             const idx = tokenIds.indexOf(claims[j].recipient)
             idx === -1 &&
                 console.error(`Token ID not found: ${claims[j].recipient}`)
 
-            const expectedAmount = amounts[idx]
+            console.log(claims[j].recipient)
 
-            console.log(
-                leafData.base.claimableAmount,
-                expectedAmount,
-                leafData.expiryTimestamp
-            )
+            const csvOutput = `${claims[j].recipient},"${leaf}",${isClaimed}\n`
 
-            let writeContent = `${claims[j].recipient} data matched`
-            if (leafData.base.claimableAmount !== expectedAmount) {
-                console.error(
-                    `${claims[j].recipient} Amount mismatch: ${leafData.base.claimableAmount} != ${expectedAmount}`
-                )
-                writeContent = `${claims[j].recipient} data mismatch: ${leafData.base.claimableAmount} != ${expectedAmount}`
-            }
-            const proofString = claims[j].proof.join(',')
-            const csvOutput = `${claims[j].recipient},${0},"${proofString}",${claims[j].group},${claims[j].data}\n`
-
-            fs.appendFileSync(`output/${PROJECT_ID}_proofs.csv`, csvOutput)
-
-            fs.appendFileSync(
-                `validate_merkle_${PROJECT_ID}_${executeTime}.log`,
-                writeContent + '\n'
-            )
+            fs.appendFileSync(filePath, csvOutput)
         }
     }
 
@@ -170,7 +142,7 @@ async function run(batchSize = 50, startAt = 0, endAt = 0) {
 
 const BATCH_SIZE = 50
 
-run(BATCH_SIZE, 5374, 5375).catch((error) => {
+run(BATCH_SIZE, 0, 0).catch((error) => {
     console.error(error)
     process.exitCode = 1
 })
