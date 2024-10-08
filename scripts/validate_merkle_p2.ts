@@ -114,7 +114,7 @@ function validateClaimsDuplicatedRecipients(claims: ClaimData[]) {
 }
 
 // Verify that all leafs in the current merkle tree are also present in the new merkle tree.
-async function validateLeafs(
+function validateLeafs(
     previousLeafs: LeafData[],
     currentWeek: number,
     currentLeafs: LeafData[],
@@ -304,7 +304,7 @@ async function run(
 
     // querying back the previous week leafs from api
 
-    await validateLeafs(previousLeafs, week, allLeafs, nftIds.length)
+    validateLeafs(previousLeafs, week, allLeafs, nftIds.length)
 
     console.log(`Script finished, total time: ${Date.now() - executeTime} ms`)
 }
@@ -312,8 +312,8 @@ async function run(
 const BATCH_SIZE = 50
 const START_AT = 0
 const END_AT = 0
-const WEEK = 2
-const CURRENT_WEEK_CSV_PATH = './claim-extra-e2e-2.csv'
+const WEEK = 3
+const CURRENT_WEEK_CSV_PATH = './claim-extra-e2e-3.csv'
 
 run(BATCH_SIZE, START_AT, END_AT, WEEK, CURRENT_WEEK_CSV_PATH).catch(
     (error) => {
