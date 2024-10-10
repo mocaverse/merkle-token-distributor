@@ -312,8 +312,8 @@ async function run(
 const BATCH_SIZE = 50
 const START_AT = 0
 const END_AT = 0
-const WEEK = 3
-const CURRENT_WEEK_CSV_PATH = './claim-extra-e2e-3.csv'
+const WEEK = 4
+const CURRENT_WEEK_CSV_PATH = './claim-extra-e2e-4.csv'
 
 run(BATCH_SIZE, START_AT, END_AT, WEEK, CURRENT_WEEK_CSV_PATH).catch(
     (error) => {

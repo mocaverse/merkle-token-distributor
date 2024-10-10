@@ -31,7 +31,7 @@ async function unlockToken(nftIds: number[]) {
     const apiUrl =
         process.env.INTERNAL_API_DOMAIN + '/api/nft/internal/unlock-nft-tokens'
 
-    console.log(apiUrl)
+    console.log(apiUrl, nftIds)
 
     const requestBody = {tokenIds: nftIds}
 
@@ -82,6 +82,6 @@ async function run(
     }
 }
 
-const CURRENT_WEEK_CSV_PATH = './claim-extra-e2e-1.csv'
+const CURRENT_WEEK_CSV_PATH = './claim-extra-e2e-4.csv'
 
 run(50, 0, 0, CURRENT_WEEK_CSV_PATH).catch((e) => console.error(e))

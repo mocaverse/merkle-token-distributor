@@ -23,6 +23,7 @@
     "generate_leaf": "npx hardhat run scripts/generate_leaf.ts --network ",
     "concierge": "npx hardhat run scripts/concierge.ts --network ",
     "validate_merkle_p2": "npx hardhat run scripts/validate_merkle_p2.ts --network ",
+    "pause_tranche2_treasury": "npx hardhat run scripts/pause_tranche2_treasury.ts --network ",
     "unlock_token": "npx hardhat run scripts/unlock_token.ts --network ",
     "verify": "npx hardhat verify --network"
   },
